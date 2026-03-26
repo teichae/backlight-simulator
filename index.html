@@ -2,115 +2,126 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>역광 시뮬레이터</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    background: linear-gradient(135deg, #0a0a1a 0%, #0d1020 100%);
-    min-height: 100vh;
-    font-family: 'Courier New', monospace;
-    color: #e0e0f0;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 16px;
-  }
-  h1 { font-size: 20px; color: #c0d0ff; letter-spacing: 2px; }
-  .subtitle { font-size: 10px; letter-spacing: 4px; color: #4a6080; margin-bottom: 4px; }
-  #status-box {
-    background: rgba(255,255,255,0.05);
-    border-radius: 8px;
-    padding: 10px 20px;
-    text-align: center;
-    width: 100%;
-    max-width: 580px;
-    transition: border-color 0.3s;
-  }
-  #status-label { font-size: 13px; font-weight: bold; letter-spacing: 2px; }
-  #status-desc { font-size: 11px; color: #8090a0; margin-top: 4px; }
-  .canvas-row {
-    display: flex;
-    gap: 16px;
-    align-items: flex-start;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-  .canvas-label { font-size: 10px; color: #4a6080; letter-spacing: 2px; margin-bottom: 6px; text-align: center; }
-  #topCanvas { border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); display: block; }
-  #previewCanvas { border-radius: 10px; border: 1px solid rgba(255,255,255,0.08); display: block; width: 100%; }
-  .side-panel { display: flex; flex-direction: column; gap: 12px; width: 180px; }
-  .info-box {
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.07);
-    border-radius: 8px;
-    padding: 12px;
-    font-size: 11px;
-  }
-  .info-title { color: #4a6080; margin-bottom: 8px; letter-spacing: 1px; }
-  .info-row { display: flex; justify-content: space-between; margin-bottom: 5px; }
-  .info-key { color: #606880; }
-  .control-panel {
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.07);
-    border-radius: 12px;
-    padding: 20px;
-    width: 100%;
-    max-width: 580px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-  }
-  .ctrl-row { display: flex; justify-content: space-between; margin-bottom: 8px; }
-  .ctrl-label { font-size: 11px; color: #8090a0; letter-spacing: 1px; }
-  .ctrl-value { font-size: 13px; font-weight: bold; }
-  input[type=range] { width: 100%; cursor: pointer; }
-  .preset-row { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
-  .preset-btn {
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 6px;
-    color: #607080;
-    padding: 4px 10px;
-    font-size: 11px;
-    cursor: pointer;
-    font-family: 'Courier New', monospace;
-    transition: all 0.2s;
-  }
-  .preset-btn:hover { opacity: 0.8; }
-  .sub-tip { font-size: 10px; color: #506070; margin-top: 4px; }
-  .toggle-row { display: flex; align-items: center; gap: 10px; }
-  .toggle {
-    width: 36px; height: 20px; border-radius: 10px;
-    background: rgba(255,255,255,0.1);
-    cursor: pointer; position: relative; transition: background 0.2s;
-  }
-  .toggle.on { background: #ffa040; }
-  .toggle-knob {
-    width: 16px; height: 16px; border-radius: 8px; background: white;
-    position: absolute; top: 2px; left: 2px; transition: left 0.2s;
-  }
-  .toggle.on .toggle-knob { left: 18px; }
-  .tip-box {
-    background: rgba(255,160,64,0.05);
-    border: 1px solid rgba(255,160,64,0.15);
-    border-radius: 10px;
-    padding: 14px 18px;
-    width: 100%;
-    max-width: 580px;
-  }
-  .tip-title { font-size: 10px; color: #ffa040; letter-spacing: 2px; margin-bottom: 8px; }
-  #tip-text { font-size: 11px; color: #8090a0; line-height: 1.7; }
-  .footer { font-size: 10px; color: #2a3040; letter-spacing: 1px; padding-bottom: 10px; }
-  .dim { opacity: 0.3; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: linear-gradient(135deg, #0a0a1a 0%, #0d1020 100%);
+  min-height: 100vh;
+  font-family: 'Courier New', monospace;
+  color: #e0e0f0;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+h1 { font-size: 18px; color: #c0d0ff; letter-spacing: 2px; }
+.subtitle { font-size: 10px; letter-spacing: 3px; color: #4a6080; margin-bottom: 4px; }
+#status-box {
+  border-radius: 8px; padding: 10px 16px;
+  text-align: center; width: 100%; max-width: 600px;
+  background: rgba(255,255,255,0.05);
+  transition: border-color 0.3s;
+}
+#status-label { font-size: 13px; font-weight: bold; letter-spacing: 2px; }
+#status-desc { font-size: 11px; color: #8090a0; margin-top: 3px; }
+
+.canvas-row { display: flex; gap: 14px; align-items: flex-start; flex-wrap: wrap; justify-content: center; }
+.canvas-label { font-size: 10px; color: #4a6080; letter-spacing: 1px; margin-bottom: 5px; text-align: center; }
+#topCanvas { border-radius: 10px; border: 1px solid rgba(255,255,255,0.08); display: block; max-width: 100%; }
+#previewCanvas { border-radius: 8px; border: 1px solid rgba(255,255,255,0.08); display: block; width: 100%; }
+
+.side-panel { display: flex; flex-direction: column; gap: 10px; width: 160px; }
+.info-box { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 8px; padding: 10px; font-size: 10px; }
+.info-title { color: #4a6080; margin-bottom: 6px; letter-spacing: 1px; font-size: 10px; }
+.info-row { display: flex; justify-content: space-between; margin-bottom: 4px; }
+.info-key { color: #606880; }
+
+.control-panel {
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 12px; padding: 16px; width: 100%; max-width: 600px;
+  display: flex; flex-direction: column; gap: 18px;
+}
+.ctrl-row { display: flex; justify-content: space-between; margin-bottom: 6px; align-items: center; }
+.ctrl-label { font-size: 11px; color: #8090a0; letter-spacing: 1px; }
+.ctrl-value { font-size: 12px; font-weight: bold; }
+input[type=range] { width: 100%; cursor: pointer; height: 20px; }
+input[type=range]:disabled { cursor: not-allowed; }
+
+.preset-row { display: flex; gap: 5px; margin-top: 8px; flex-wrap: wrap; }
+.preset-btn {
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 5px; color: #607080; padding: 4px 9px;
+  font-size: 10px; cursor: pointer; font-family: 'Courier New', monospace; transition: all 0.2s;
+}
+
+/* 계절 탭 */
+.season-tabs { display: flex; gap: 6px; margin-bottom: 12px; }
+.season-tab {
+  flex: 1; padding: 8px 4px; border-radius: 6px; text-align: center;
+  font-size: 11px; font-family: 'Courier New', monospace;
+  cursor: pointer; border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.03); color: #607080;
+  transition: all 0.2s;
+}
+.season-tab.active { font-weight: bold; }
+
+/* 시간 타임라인 */
+.timeline-wrap { position: relative; }
+.timeline-bar {
+  width: 100%; height: 28px; border-radius: 6px;
+  position: relative; overflow: hidden; cursor: pointer;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+.timeline-segments { display: flex; height: 100%; }
+.tl-seg { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 8px; color: rgba(255,255,255,0.5); }
+.timeline-cursor {
+  position: absolute; top: 0; width: 2px; height: 100%;
+  background: white; pointer-events: none;
+  box-shadow: 0 0 6px rgba(255,255,255,0.8);
+}
+.timeline-labels { display: flex; justify-content: space-between; margin-top: 4px; padding: 0 2px; }
+.tl-label { font-size: 9px; color: #506070; }
+.time-display {
+  text-align: center; margin-top: 6px;
+  font-size: 13px; font-weight: bold; letter-spacing: 2px;
+}
+.time-sublabel { font-size: 10px; color: #8090a0; margin-top: 2px; text-align: center; }
+
+/* 황금시간대 마커 */
+.golden-markers { display: flex; gap: 4px; margin-top: 8px; flex-wrap: wrap; }
+.golden-marker {
+  font-size: 10px; padding: 3px 8px; border-radius: 4px;
+  border: 1px solid rgba(255,160,30,0.3); background: rgba(255,160,30,0.08);
+  color: #ffa030; cursor: pointer;
+}
+.golden-marker:hover { background: rgba(255,160,30,0.15); }
+
+.sub-tip { font-size: 10px; color: #506070; margin-top: 4px; }
+.toggle-row { display: flex; align-items: center; gap: 10px; }
+.toggle { width: 36px; height: 20px; border-radius: 10px; background: rgba(255,255,255,0.1); cursor: pointer; position: relative; transition: background 0.2s; flex-shrink: 0; }
+.toggle.on { background: #ffa040; }
+.toggle-knob { width: 16px; height: 16px; border-radius: 8px; background: white; position: absolute; top: 2px; left: 2px; transition: left 0.2s; }
+.toggle.on .toggle-knob { left: 18px; }
+
+.tip-box {
+  background: rgba(255,160,64,0.05); border: 1px solid rgba(255,160,64,0.15);
+  border-radius: 10px; padding: 12px 16px; width: 100%; max-width: 600px;
+}
+.tip-title { font-size: 10px; color: #ffa040; letter-spacing: 2px; margin-bottom: 6px; }
+#tip-text { font-size: 11px; color: #8090a0; line-height: 1.7; }
+.footer { font-size: 10px; color: #2a3040; letter-spacing: 1px; padding-bottom: 10px; text-align: center; }
+.dim { opacity: 0.3; pointer-events: none; }
+.section-divider { border: none; border-top: 1px solid rgba(255,255,255,0.05); }
 </style>
 </head>
 <body>
 
 <div style="text-align:center">
-  <div class="subtitle">PHOTOGRAPHY SIMULATOR v2</div>
-  <h1>역광 + 고도 시뮬레이터</h1>
+  <div class="subtitle">PHOTOGRAPHY SIMULATOR v3</div>
+  <h1>역광 + 한국 계절별 태양 시뮬레이터</h1>
 </div>
 
 <div id="status-box">
@@ -121,25 +132,61 @@
 <div class="canvas-row">
   <div>
     <div class="canvas-label">TOP VIEW — 수평구도 + 좌하단 고도계</div>
-    <canvas id="topCanvas" width="380" height="380"></canvas>
+    <canvas id="topCanvas" width="360" height="360"></canvas>
   </div>
   <div class="side-panel">
     <div>
       <div class="canvas-label">PREVIEW</div>
-      <canvas id="previewCanvas" width="160" height="200"></canvas>
+      <canvas id="previewCanvas" width="150" height="190"></canvas>
     </div>
     <div class="info-box">
       <div class="info-title">LIGHT INFO</div>
       <div class="info-row"><span class="info-key">림라이트</span><span id="info-rim">—</span></div>
-      <div class="info-row"><span class="info-key">빛 색온도</span><span id="info-temp">—</span></div>
-      <div class="info-row"><span class="info-key">그림자길이</span><span id="info-shadow">—</span></div>
-      <div class="info-row"><span class="info-key">추천여부</span><span id="info-rec">—</span></div>
+      <div class="info-row"><span class="info-key">색온도</span><span id="info-temp">—</span></div>
+      <div class="info-row"><span class="info-key">그림자</span><span id="info-shadow">—</span></div>
+      <div class="info-row"><span class="info-key">추천</span><span id="info-rec">—</span></div>
     </div>
   </div>
 </div>
 
 <div class="control-panel">
-  <!-- 수평방향 -->
+
+  <!-- ① 계절 선택 -->
+  <div>
+    <div class="ctrl-row" style="margin-bottom:10px">
+      <span class="ctrl-label">🗓 계절 선택 (서울 기준)</span>
+    </div>
+    <div class="season-tabs">
+      <div class="season-tab" id="tab-spring" onclick="setSeason('spring')">🌸 봄<br><span style="font-size:9px;color:#8090a0">3~5월</span></div>
+      <div class="season-tab active" id="tab-summer" onclick="setSeason('summer')">☀ 여름<br><span style="font-size:9px;color:#8090a0">6~8월</span></div>
+      <div class="season-tab" id="tab-fall" onclick="setSeason('fall')">🍂 가을<br><span style="font-size:9px;color:#8090a0">9~11월</span></div>
+      <div class="season-tab" id="tab-winter" onclick="setSeason('winter')">❄ 겨울<br><span style="font-size:9px;color:#8090a0">12~2월</span></div>
+    </div>
+
+    <!-- 타임라인 바 -->
+    <div class="timeline-wrap" style="margin-top:4px">
+      <div class="timeline-bar" id="timelineBar" onclick="onTimelineClick(event)" ontouchmove="onTimelineTouch(event)" ontouchstart="onTimelineTouch(event)">
+        <div class="timeline-segments" id="timelineSegs"></div>
+        <div class="timeline-cursor" id="timelineCursor"></div>
+      </div>
+      <div class="timeline-labels" id="timelineLabels"></div>
+    </div>
+
+    <input type="range" id="timeSlider" min="0" max="100" value="50" oninput="onTimeSlider()" style="margin-top:4px">
+
+    <div class="time-display" id="time-display">—</div>
+    <div class="time-sublabel" id="time-sublabel">—</div>
+
+    <!-- 골든아워 빠른 이동 -->
+    <div style="margin-top:8px">
+      <div style="font-size:10px;color:#4a6080;margin-bottom:4px;letter-spacing:1px">☀ 골든아워 빠른 이동</div>
+      <div class="golden-markers" id="goldenMarkers"></div>
+    </div>
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- ② 태양 수평 방향 -->
   <div>
     <div class="ctrl-row">
       <span class="ctrl-label">↔ 태양 수평 방향</span>
@@ -155,22 +202,9 @@
     </div>
   </div>
 
-  <!-- 고도 -->
-  <div>
-    <div class="ctrl-row">
-      <span class="ctrl-label">↕ 태양 고도 (높이)</span>
-      <span class="ctrl-value" id="elev-val" style="color:#e0c080">15°</span>
-    </div>
-    <input type="range" id="elevSlider" min="0" max="90" value="15" oninput="update()">
-    <div class="preset-row">
-      <button class="preset-btn" onclick="setElev(5)" data-elev="5">일출/일몰 5°</button>
-      <button class="preset-btn" onclick="setElev(25)" data-elev="25">오전 10시 25°</button>
-      <button class="preset-btn" onclick="setElev(45)" data-elev="45">오후 3시 45°</button>
-      <button class="preset-btn" onclick="setElev(80)" data-elev="80">정오 80°</button>
-    </div>
-  </div>
+  <hr class="section-divider">
 
-  <!-- 필 라이트 -->
+  <!-- ③ 필 라이트 -->
   <div id="fill-section">
     <div class="ctrl-row">
       <span class="ctrl-label">⚡ 필 라이트 (스트로브/반사판)</span>
@@ -180,11 +214,9 @@
     <div class="sub-tip" id="fill-tip"></div>
   </div>
 
-  <!-- 림라이트 토글 -->
+  <!-- ④ 림라이트 토글 -->
   <div class="toggle-row">
-    <div class="toggle on" id="rimToggle" onclick="toggleRim()">
-      <div class="toggle-knob"></div>
-    </div>
+    <div class="toggle on" id="rimToggle" onclick="toggleRim()"><div class="toggle-knob"></div></div>
     <span style="font-size:11px;color:#8090a0;letter-spacing:1px">림라이트 시각화</span>
   </div>
 </div>
@@ -194,32 +226,216 @@
   <div id="tip-text">—</div>
 </div>
 
-<div class="footer">BACKLIGHT PHOTOGRAPHY SIMULATOR v2 — 수평방향 + 태양고도</div>
+<div class="footer">BACKLIGHT PHOTOGRAPHY SIMULATOR v3 — 서울(북위 37°) 기준</div>
 
 <script>
 const DEG = Math.PI / 180;
 let showRim = true;
+let currentSeason = 'summer';
 
 function lerp(a, b, t) { return a + (b - a) * t; }
+function rgbStr(c, a=1) { return `rgba(${c.r},${c.g},${c.b},${a})`; }
 
-function sunColor(elevation) {
-  if (elevation < 10) return { r: 255, g: 120, b: 30 };
-  if (elevation < 20) return { r: 255, g: 160, b: 60 };
-  if (elevation < 40) return { r: 255, g: 200, b: 120 };
-  if (elevation < 65) return { r: 255, g: 225, b: 180 };
-  return { r: 220, g: 235, b: 255 };
+// ==========================================
+// 서울(북위 37°) 기준 시간별 태양 고도 데이터
+// ==========================================
+const SEASON_DATA = {
+  spring: {
+    name: "봄 (3~5월)", color: "#ff90b0",
+    sunrise: 6.0, sunset: 18.5,
+    maxElev: 52,
+    // 시간별 고도 (5시~20시)
+    hours: [5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20],
+    elevs: [0, 2,14,27,38,46,51,52,50,44,35,24,12, 2, 0, 0],
+    goldenHours: ["06:00~07:30", "17:00~18:30"],
+    goldenSliders: [8, 88],
+    desc: "봄은 정오 최고 52°. 오전 6~7시반, 오후 5~6시반이 황금시간대"
+  },
+  summer: {
+    name: "여름 (6~8월)", color: "#ffcc40",
+    sunrise: 5.2, sunset: 19.8,
+    maxElev: 76,
+    hours: [5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20],
+    elevs: [1,14,28,41,53,63,71,76,74,66,55,42,28,14, 3, 0],
+    goldenHours: ["05:00~07:00", "18:00~20:00"],
+    goldenSliders: [3, 90],
+    desc: "여름은 정오 76° 탑라이트. 이른 오전·늦은 오후에만 좋은 빛"
+  },
+  fall: {
+    name: "가을 (9~11월)", color: "#ff8030",
+    sunrise: 6.2, sunset: 17.8,
+    maxElev: 47,
+    hours: [6,7,8,9,10,11,12,13,14,15,16,17,18,19],
+    elevs: [0,12,24,35,43,47,47,44,38,29,18, 7, 0, 0],
+    goldenHours: ["06:30~08:00", "16:00~17:30"],
+    goldenSliders: [10, 85],
+    desc: "가을은 정오 47°로 봄과 비슷. 황금시간대가 길고 빛이 따뜻함"
+  },
+  winter: {
+    name: "겨울 (12~2월)", color: "#80c0ff",
+    sunrise: 7.7, sunset: 17.3,
+    maxElev: 29,
+    hours: [7,8,9,10,11,12,13,14,15,16,17,18],
+    elevs: [0, 4,13,21,27,29,28,23,15, 6, 0, 0],
+    goldenHours: ["07:30~09:00", "15:00~17:00"],
+    goldenSliders: [15, 80],
+    desc: "겨울은 정오도 29°! 하루 종일 낮은 빛 — 인물 사진 황금 시즌"
+  }
+};
+
+// 슬라이더 값(0~100) → 해당 계절 태양 고도 반환
+function sliderToElev(sliderVal, season) {
+  const d = SEASON_DATA[season];
+  const hrs = d.hours, els = d.elevs;
+  const totalSpan = d.sunset - d.sunrise;
+  // 슬라이더 0 = 일출, 100 = 일몰
+  const hour = d.sunrise + (sliderVal / 100) * totalSpan;
+
+  // 선형 보간
+  for (let i = 0; i < hrs.length - 1; i++) {
+    if (hour >= hrs[i] && hour <= hrs[i+1]) {
+      const t = (hour - hrs[i]) / (hrs[i+1] - hrs[i]);
+      return Math.max(0, Math.round(lerp(els[i], els[i+1], t)));
+    }
+  }
+  if (hour <= hrs[0]) return Math.max(0, els[0]);
+  return Math.max(0, els[els.length-1]);
 }
 
-function rgbStr(c, a = 1) { return `rgba(${c.r},${c.g},${c.b},${a})`; }
+function sliderToHour(sliderVal, season) {
+  const d = SEASON_DATA[season];
+  return d.sunrise + (sliderVal / 100) * (d.sunset - d.sunrise);
+}
+
+function hourToStr(h) {
+  const hh = Math.floor(h);
+  const mm = Math.round((h - hh) * 60);
+  return `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}`;
+}
+
+function setSeason(s) {
+  currentSeason = s;
+  Object.keys(SEASON_DATA).forEach(k => {
+    const tab = document.getElementById(`tab-${k}`);
+    tab.classList.toggle('active', k === s);
+    const c = SEASON_DATA[k].color;
+    if (k === s) {
+      tab.style.borderColor = c;
+      tab.style.color = c;
+      tab.style.background = c + '15';
+    } else {
+      tab.style.borderColor = 'rgba(255,255,255,0.1)';
+      tab.style.color = '#607080';
+      tab.style.background = 'rgba(255,255,255,0.03)';
+    }
+  });
+  buildTimeline();
+  buildGoldenMarkers();
+  update();
+}
+
+function buildTimeline() {
+  const d = SEASON_DATA[currentSeason];
+  const seg = document.getElementById('timelineSegs');
+  const labels = document.getElementById('timelineLabels');
+  seg.innerHTML = '';
+  labels.innerHTML = '';
+
+  const totalSpan = d.sunset - d.sunrise;
+  const hours = d.hours, elevs = d.elevs;
+
+  // 고도에 따른 색상 생성
+  for (let i = 0; i < 40; i++) {
+    const frac = i / 39;
+    const hour = d.sunrise + frac * totalSpan;
+    let elev = 0;
+    for (let j = 0; j < hours.length - 1; j++) {
+      if (hour >= hours[j] && hour <= hours[j+1]) {
+        const t = (hour - hours[j]) / (hours[j+1] - hours[j]);
+        elev = Math.max(0, lerp(elevs[j], elevs[j+1], t));
+        break;
+      }
+    }
+    const div = document.createElement('div');
+    div.className = 'tl-seg';
+    div.style.flex = '1';
+    // 골든아워: 빨간-주황, 일반: 파란-노랑 그라데이션
+    let bg;
+    if (elev < 20) {
+      const t = elev / 20;
+      bg = `rgba(255,${Math.round(lerp(80,180,t))},30,${lerp(0.5,0.7,t)})`;
+    } else if (elev < 65) {
+      const t = (elev - 20) / 45;
+      bg = `rgba(${Math.round(lerp(255,200,t))},${Math.round(lerp(180,220,t))},${Math.round(lerp(30,180,t))},0.7)`;
+    } else {
+      bg = `rgba(180,210,255,0.7)`;
+    }
+    div.style.background = bg;
+    seg.appendChild(div);
+  }
+
+  // 라벨
+  const labelHours = [d.sunrise, (d.sunrise+d.sunset)/2, d.sunset];
+  labelHours.forEach(h => {
+    const span = document.createElement('span');
+    span.className = 'tl-label';
+    span.textContent = hourToStr(h);
+    labels.appendChild(span);
+  });
+}
+
+function buildGoldenMarkers() {
+  const d = SEASON_DATA[currentSeason];
+  const container = document.getElementById('goldenMarkers');
+  container.innerHTML = '';
+  d.goldenHours.forEach((label, i) => {
+    const btn = document.createElement('div');
+    btn.className = 'golden-marker';
+    btn.textContent = '☀ ' + label;
+    const sv = d.goldenSliders[i];
+    btn.onclick = () => {
+      document.getElementById('timeSlider').value = sv;
+      onTimeSlider();
+    };
+    container.appendChild(btn);
+  });
+}
+
+function updateCursor() {
+  const sv = parseInt(document.getElementById('timeSlider').value);
+  const cursor = document.getElementById('timelineCursor');
+  cursor.style.left = sv + '%';
+}
+
+function onTimeSlider() {
+  updateCursor();
+  update();
+}
+
+function onTimelineClick(e) {
+  const bar = document.getElementById('timelineBar');
+  const rect = bar.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const frac = Math.max(0, Math.min(1, x / rect.width));
+  document.getElementById('timeSlider').value = Math.round(frac * 100);
+  onTimeSlider();
+}
+
+function onTimelineTouch(e) {
+  e.preventDefault();
+  const bar = document.getElementById('timelineBar');
+  const rect = bar.getBoundingClientRect();
+  const x = e.touches[0].clientX - rect.left;
+  const frac = Math.max(0, Math.min(1, x / rect.width));
+  document.getElementById('timeSlider').value = Math.round(frac * 100);
+  onTimeSlider();
+}
 
 function setAngle(v) {
   document.getElementById('angleSlider').value = v;
   update();
 }
-function setElev(v) {
-  document.getElementById('elevSlider').value = v;
-  update();
-}
+
 function toggleRim() {
   showRim = !showRim;
   const el = document.getElementById('rimToggle');
@@ -227,53 +443,75 @@ function toggleRim() {
   update();
 }
 
+function sunColor(elevation) {
+  if (elevation < 8)  return { r:255, g:100, b:20 };
+  if (elevation < 18) return { r:255, g:155, b:55 };
+  if (elevation < 35) return { r:255, g:200, b:115 };
+  if (elevation < 60) return { r:255, g:225, b:175 };
+  return { r:215, g:232, b:255 };
+}
+
 function update() {
   const sunAngle = parseInt(document.getElementById('angleSlider').value);
-  const sunElevation = parseInt(document.getElementById('elevSlider').value);
   const fillLight = parseInt(document.getElementById('fillSlider').value);
+  const sliderVal = parseInt(document.getElementById('timeSlider').value);
+
+  const sunElevation = sliderToElev(sliderVal, currentSeason);
+  const hour = sliderToHour(sliderVal, currentSeason);
+  const d = SEASON_DATA[currentSeason];
 
   const isBacklit = sunAngle > 120 && sunAngle < 240;
   const isSidelit = (sunAngle >= 60 && sunAngle <= 120) || (sunAngle >= 240 && sunAngle <= 300);
   const isTopLight = sunElevation > 65;
-  const isGoldenHour = sunElevation < 20;
+  const isGoldenHour = sunElevation < 20 && sunElevation > 0;
   const rimStrengthBase = Math.max(0.05, 1 - sunElevation / 70);
   const sc = sunColor(sunElevation);
 
-  // --- 상태 업데이트 ---
+  // 시간 표시
+  const timeStr = hourToStr(hour);
+  let timePeriod = '';
+  if (sunElevation === 0) timePeriod = '일출 / 일몰';
+  else if (isGoldenHour) timePeriod = '☀ 골든아워 — 인물 촬영 최고의 시간!';
+  else if (sunElevation < 35) timePeriod = '오전 이른 시간 / 오후 늦은 시간';
+  else if (isTopLight) timePeriod = '⚠ 정오 전후 — 탑라이트 주의';
+  else timePeriod = '오전 / 오후';
+
+  document.getElementById('time-display').textContent = timeStr;
+  document.getElementById('time-display').style.color = isGoldenHour ? '#ff8020' : isTopLight ? '#c080ff' : '#c0d0ff';
+  document.getElementById('time-sublabel').textContent = `고도 ${sunElevation}° | ${timePeriod}`;
+
+  updateCursor();
+
+  // 상태
   let statusLabel, statusColor, statusDesc;
-  if (isTopLight && isBacklit) { statusLabel = "탑라이트 역광"; statusColor = "#c080ff"; statusDesc = "머리 위 역광 — 림라이트 매우 약함, 필 라이트 필수"; }
+  if (sunElevation === 0) { statusLabel = "일출 / 일몰"; statusColor = "#ff6010"; statusDesc = "태양이 지평선에 걸쳐있음 — 극적인 실루엣 가능"; }
+  else if (isTopLight && isBacklit) { statusLabel = "탑라이트 역광"; statusColor = "#c080ff"; statusDesc = "머리 위 역광 — 림라이트 매우 약함, 필 라이트 필수"; }
   else if (isTopLight) { statusLabel = "탑라이트 ⚠ 정오"; statusColor = "#c080ff"; statusDesc = "인물 사진 최악 조건 — 눈 밑 그림자가 강하게 생김"; }
-  else if (isGoldenHour && isBacklit) { statusLabel = "골든아워 역광 ★"; statusColor = "#ff7010"; statusDesc = "가장 강렬한 림라이트 — 황금빛 윤곽 살아남"; }
-  else if (isGoldenHour) { statusLabel = "골든아워"; statusColor = "#ff9030"; statusDesc = "낮고 따뜻한 빛 — 피부가 황금빛으로 아름답게"; }
+  else if (isGoldenHour && isBacklit) { statusLabel = "골든아워 역광 ★"; statusColor = "#ff6010"; statusDesc = "가장 강렬한 림라이트 — 황금빛 윤곽 살아남"; }
+  else if (isGoldenHour) { statusLabel = "골든아워 ★"; statusColor = "#ff8020"; statusDesc = "낮고 따뜻한 빛 — 피부가 황금빛으로 아름답게"; }
   else if (isBacklit) { statusLabel = "역광 (BACKLIT)"; statusColor = "#ffa040"; statusDesc = "림라이트 활성화 — 인물 윤곽에 빛 발생"; }
   else if (isSidelit) { statusLabel = "사이드광 (SIDELIT)"; statusColor = "#60c0ff"; statusDesc = "입체감 극대화 — 얼굴 명암 자연스럽게 형성"; }
   else { statusLabel = "순광 (FRONTLIT)"; statusColor = "#90d090"; statusDesc = "얼굴 고르게 밝음 — 그림자 없지만 입체감 부족"; }
 
   const sb = document.getElementById('status-box');
-  sb.style.borderColor = statusColor + '40';
   sb.style.border = `1px solid ${statusColor}40`;
   document.getElementById('status-label').style.color = statusColor;
   document.getElementById('status-label').textContent = statusLabel;
   document.getElementById('status-desc').textContent = statusDesc;
 
-  // 슬라이더 값 표시
   document.getElementById('angle-val').style.color = statusColor;
   document.getElementById('angle-val').textContent = sunAngle + '°';
-  const elevColor = isGoldenHour ? '#ff8020' : isTopLight ? '#c080ff' : '#e0c080';
-  document.getElementById('elev-val').style.color = elevColor;
-  document.getElementById('elev-val').textContent = sunAngle + '° ' + (isGoldenHour ? '☀ 골든아워' : isTopLight ? '⬆ 탑라이트' : '');
-  document.getElementById('elev-val').textContent = sunElevation + '° ' + (isGoldenHour ? '☀ 골든아워' : isTopLight ? '⬆ 탑라이트' : '');
-
   document.getElementById('fill-val').textContent = fillLight === 0 ? 'OFF' : fillLight + '%';
+
   const fs = document.getElementById('fill-section');
   fs.className = isBacklit ? '' : 'dim';
   document.getElementById('fillSlider').disabled = !isBacklit;
 
   let fillTip = '';
   if (isBacklit) {
-    if (fillLight === 0) fillTip = '필 라이트 없음 — 실루엣화';
-    else if (fillLight <= 30) fillTip = '약한 필 라이트 — 림라이트 유지 + 얼굴 살짝';
-    else if (fillLight <= 70) fillTip = '적당한 필 라이트 — 림라이트 + 얼굴 밝음 ✓ 이상적';
+    if (fillLight === 0) fillTip = '필 라이트 없음 — 실루엣화됩니다';
+    else if (fillLight <= 30) fillTip = '약한 필 라이트 — 림라이트 유지 + 얼굴 살짝 살아남';
+    else if (fillLight <= 70) fillTip = '✓ 이상적 — 림라이트 + 얼굴 밝기 모두 확보';
     else fillTip = '⚠ 강한 필 라이트 — 인공조명 티 날 수 있음';
   }
   document.getElementById('fill-tip').textContent = fillTip;
@@ -284,245 +522,228 @@ function update() {
   document.getElementById('info-temp').style.color = rgbStr(sc);
   document.getElementById('info-temp').textContent = isGoldenHour ? '딥웜' : isTopLight ? '쿨화이트' : '웜';
   document.getElementById('info-shadow').style.color = '#60c0ff';
-  document.getElementById('info-shadow').textContent = isTopLight ? '짧고 강함' : isGoldenHour ? '길고 약함' : '보통';
-  const recColor = isTopLight ? '#c080ff' : (isGoldenHour && isBacklit) ? '#ff8020' : '#90d090';
+  document.getElementById('info-shadow').textContent = isTopLight ? '짧고 강함' : isGoldenHour ? '길고 드라마틱' : '보통';
+  const recColor = isTopLight ? '#c080ff' : (isGoldenHour && isBacklit) ? '#ff6010' : '#90d090';
   document.getElementById('info-rec').style.color = recColor;
   document.getElementById('info-rec').textContent = isTopLight ? '⚠ 비추' : (isGoldenHour && isBacklit) ? '★ 최고' : '✓ OK';
 
   // 프리셋 버튼 스타일
   document.querySelectorAll('[data-angle]').forEach(btn => {
     const a = parseInt(btn.dataset.angle);
-    const colors = { 180: '#ffa040', 135: '#ffa060', 225: '#ffa060', 90: '#60c0ff', 0: '#90d090' };
+    const colors = { 180:'#ffa040', 135:'#ffa060', 225:'#ffa060', 90:'#60c0ff', 0:'#90d090' };
     const c = colors[a] || '#607080';
-    btn.style.background = sunAngle === a ? c + '20' : 'rgba(255,255,255,0.04)';
+    btn.style.background = sunAngle === a ? c+'20' : 'rgba(255,255,255,0.04)';
     btn.style.borderColor = sunAngle === a ? c : 'rgba(255,255,255,0.1)';
     btn.style.color = sunAngle === a ? c : '#607080';
-  });
-  document.querySelectorAll('[data-elev]').forEach(btn => {
-    const e = parseInt(btn.dataset.elev);
-    const colors = { 5: '#ff7010', 25: '#e0a040', 45: '#d0b060', 80: '#c080ff' };
-    const c = colors[e] || '#607080';
-    btn.style.background = sunElevation === e ? c + '20' : 'rgba(255,255,255,0.04)';
-    btn.style.borderColor = sunElevation === e ? c : 'rgba(255,255,255,0.1)';
-    btn.style.color = sunElevation === e ? c : '#607080';
   });
 
   // TIP
   let tip = '';
-  if (isTopLight) tip = "정오 탑라이트는 인물 사진에서 가장 피해야 할 조건이에요. 눈 밑, 코 밑에 강한 그림자가 생깁니다. 이 시간대엔 그늘 안으로 들어가거나 건물 반사광을 활용하는 게 맞아요.";
-  else if (isGoldenHour && isBacklit && fillLight === 0) tip = "골든아워 역광 — 최고의 조건이지만 인물이 너무 어두워요. V100 화이트돔 끼고 1/8 출력으로 필 라이트를 살짝 더해주면 황금빛 림라이트 + 밝은 얼굴이 동시에 완성됩니다.";
-  else if (isGoldenHour && isBacklit && fillLight > 0 && fillLight <= 70) tip = "완벽한 골든아워 역광 + 필 라이트 세팅! 황금빛 림라이트가 살아있으면서 얼굴도 밝습니다 ✓";
-  else if (isBacklit && fillLight === 0) tip = "역광 — 인물이 실루엣화 됩니다. V100 화이트돔 끼고 1/4~1/8 출력으로 필 라이트를 더해주세요. 매뉴얼 모드로 고정하는 게 안정적이에요.";
+  if (sunElevation === 0) tip = d.name + " 일출/일몰 시간이에요. 태양이 지평선에 딱 걸려있는 순간으로 실루엣 연출에 최고이지만 촬영 가능 시간이 아주 짧아요.";
+  else if (isTopLight) tip = "정오 탑라이트는 인물 사진 최악 조건이에요. 눈 밑, 코 밑에 강한 그림자가 생깁니다. " + (currentSeason === 'winter' ? "겨울엔 정오에도 29°라 탑라이트가 없고 하루 종일 좋은 빛이에요!" : "이 시간대엔 그늘 안으로 들어가세요.");
+  else if (isGoldenHour && isBacklit && fillLight === 0) tip = "골든아워 역광 최고의 조건! 근데 인물이 너무 어두워요. V100 화이트돔 끼고 1/8 출력으로 필 라이트를 살짝 더해주면 황금빛 림라이트 + 밝은 얼굴이 동시에 완성돼요.";
+  else if (isGoldenHour && isBacklit && fillLight > 0 && fillLight <= 70) tip = "완벽한 골든아워 역광 + 필 라이트 세팅! 황금빛 림라이트가 살아있으면서 얼굴도 밝습니다 ✓ " + d.desc;
+  else if (isGoldenHour) tip = "골든아워 좋은 빛이에요! " + d.desc + " 역광 방향으로 세우면 더 드라마틱한 사진을 찍을 수 있어요.";
+  else if (isBacklit && fillLight === 0) tip = "역광 — 인물이 실루엣화됩니다. V100 화이트돔 끼고 1/4~1/8 출력으로 필 라이트를 더해주세요.";
   else if (isBacklit && fillLight > 0 && fillLight <= 70) tip = "이상적인 역광 + 필 라이트 세팅! 림라이트로 윤곽이 살아있으면서 얼굴 밝기도 확보됩니다.";
-  else if (isBacklit && fillLight > 70) tip = "필 라이트가 너무 강해요. 인공조명 티가 날 수 있습니다. 출력을 낮추거나 거리를 멀리하세요.";
-  else if (isSidelit) tip = "사이드광은 입체감이 최고인 위치예요. 얼굴 명암이 자연스럽게 형성되어 피부 질감이 살아납니다.";
-  else tip = "순광 — 나무나 처마 아래에서는 얼룩 그림자가 생깁니다. 그늘 경계선을 찾거나 흐린 날을 활용하세요.";
+  else if (isBacklit && fillLight > 70) tip = "필 라이트가 너무 강해요. 출력을 낮추거나 거리를 멀리하세요.";
+  else if (isSidelit) tip = "사이드광은 입체감이 최고인 위치예요. " + d.desc;
+  else tip = "순광 상태 — 나무나 처마 아래에서는 얼룩 그림자가 생깁니다. 그늘 경계선을 찾거나 확산광 위치를 활용하세요.";
   document.getElementById('tip-text').textContent = tip;
 
-  // === 캔버스 그리기 ===
   drawTop(sunAngle, sunElevation, fillLight, isBacklit, isSidelit, isTopLight, rimStrengthBase, sc);
   drawPreview(sunElevation, fillLight, isBacklit, isSidelit, isTopLight, rimStrengthBase, sc);
 }
 
+// ==========================================
+// TOP VIEW 캔버스
+// ==========================================
 function drawTop(sunAngle, sunElevation, fillLight, isBacklit, isSidelit, isTopLight, rimStrengthBase, sc) {
   const canvas = document.getElementById('topCanvas');
   const ctx = canvas.getContext('2d');
-  const W = 380, H = 380, CX = W/2, CY = H/2, SR = 22, CAM_Y = H-40, SUN_DIST = 140;
+  const W=360, H=360, CX=W/2, CY=H/2, SR=20, CAM_Y=H-38, SUN_DIST=130;
+  ctx.clearRect(0,0,W,H);
 
-  ctx.clearRect(0, 0, W, H);
+  const bg = ctx.createRadialGradient(CX,CY,10,CX,CY,W*0.7);
+  bg.addColorStop(0,"#1a1a2e"); bg.addColorStop(1,"#0d0d1a");
+  ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle="rgba(255,255,255,0.04)"; ctx.lineWidth=1;
+  for (let i=0;i<W;i+=30) { ctx.beginPath();ctx.moveTo(i,0);ctx.lineTo(i,H);ctx.stroke();ctx.beginPath();ctx.moveTo(0,i);ctx.lineTo(W,i);ctx.stroke(); }
 
-  const bg = ctx.createRadialGradient(CX, CY, 10, CX, CY, W*0.7);
-  bg.addColorStop(0, "#1a1a2e"); bg.addColorStop(1, "#0d0d1a");
-  ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+  const sunRad=(sunAngle-90)*DEG;
+  const sunX=CX+SUN_DIST*Math.cos(sunRad), sunY=CY+SUN_DIST*Math.sin(sunRad);
+  const dx=CX-sunX, dy=CY-sunY, dist=Math.sqrt(dx*dx+dy*dy);
+  const nx=dx/dist, ny=dy/dist;
 
-  ctx.strokeStyle = "rgba(255,255,255,0.04)"; ctx.lineWidth = 1;
-  for (let i = 0; i < W; i += 30) {
-    ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,H); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(0,i); ctx.lineTo(W,i); ctx.stroke();
+  const rayOp=lerp(0.04,0.28,rimStrengthBase);
+  for (let i=0;i<12;i++) {
+    const sp=(i/11-0.5)*0.6;
+    const rx=nx*Math.cos(sp)-ny*Math.sin(sp), ry=nx*Math.sin(sp)+ny*Math.cos(sp);
+    const g=ctx.createLinearGradient(sunX,sunY,sunX+rx*280,sunY+ry*280);
+    g.addColorStop(0,rgbStr(sc,rayOp)); g.addColorStop(0.4,rgbStr(sc,rayOp*0.3)); g.addColorStop(1,rgbStr(sc,0));
+    ctx.strokeStyle=g; ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.moveTo(sunX,sunY);ctx.lineTo(sunX+rx*280,sunY+ry*280);ctx.stroke();
   }
-
-  const sunRad = (sunAngle - 90) * DEG;
-  const sunX = CX + SUN_DIST * Math.cos(sunRad);
-  const sunY = CY + SUN_DIST * Math.sin(sunRad);
-  const dx = CX - sunX, dy = CY - sunY;
-  const dist = Math.sqrt(dx*dx + dy*dy);
-  const nx = dx/dist, ny = dy/dist;
-
-  const rayOpacity = lerp(0.05, 0.30, rimStrengthBase);
-  for (let i = 0; i < 12; i++) {
-    const spread = (i/11 - 0.5) * 0.6;
-    const rx = nx*Math.cos(spread) - ny*Math.sin(spread);
-    const ry = nx*Math.sin(spread) + ny*Math.cos(spread);
-    const g = ctx.createLinearGradient(sunX, sunY, sunX+rx*300, sunY+ry*300);
-    g.addColorStop(0, rgbStr(sc, rayOpacity));
-    g.addColorStop(0.4, rgbStr(sc, rayOpacity*0.3));
-    g.addColorStop(1, rgbStr(sc, 0));
-    ctx.strokeStyle = g; ctx.lineWidth = 1.5;
-    ctx.beginPath(); ctx.moveTo(sunX,sunY); ctx.lineTo(sunX+rx*300,sunY+ry*300); ctx.stroke();
-  }
-
-  const gg = ctx.createRadialGradient(sunX,sunY,0,sunX,sunY,80);
-  gg.addColorStop(0, rgbStr(sc,0.5)); gg.addColorStop(0.3, rgbStr(sc,0.15)); gg.addColorStop(1, rgbStr(sc,0));
-  ctx.fillStyle = gg; ctx.beginPath(); ctx.arc(sunX,sunY,80,0,Math.PI*2); ctx.fill();
+  const gg=ctx.createRadialGradient(sunX,sunY,0,sunX,sunY,75);
+  gg.addColorStop(0,rgbStr(sc,0.5));gg.addColorStop(0.3,rgbStr(sc,0.15));gg.addColorStop(1,rgbStr(sc,0));
+  ctx.fillStyle=gg;ctx.beginPath();ctx.arc(sunX,sunY,75,0,Math.PI*2);ctx.fill();
 
   if (!isBacklit) {
-    const shadowLen = lerp(90, 15, sunElevation/90);
-    const sg = ctx.createLinearGradient(CX,CY,CX-nx*shadowLen,CY-ny*shadowLen);
-    sg.addColorStop(0,"rgba(0,0,0,0.5)"); sg.addColorStop(1,"rgba(0,0,0,0)");
-    ctx.fillStyle = sg;
-    ctx.beginPath(); ctx.ellipse(CX-nx*shadowLen*0.5, CY-ny*shadowLen*0.5, SR*0.8, shadowLen*0.4, Math.atan2(-ny,-nx), 0, Math.PI*2); ctx.fill();
+    const sl=lerp(80,12,sunElevation/90);
+    const sg=ctx.createLinearGradient(CX,CY,CX-nx*sl,CY-ny*sl);
+    sg.addColorStop(0,"rgba(0,0,0,0.5)");sg.addColorStop(1,"rgba(0,0,0,0)");
+    ctx.fillStyle=sg;ctx.beginPath();ctx.ellipse(CX-nx*sl*0.5,CY-ny*sl*0.5,SR*0.8,sl*0.38,Math.atan2(-ny,-nx),0,Math.PI*2);ctx.fill();
   }
 
-  const pg = ctx.createRadialGradient(CX-nx*8, CY-ny*8, 0, CX, CY, SR*1.8);
-  if (isBacklit) { pg.addColorStop(0,"rgba(30,20,15,1)"); pg.addColorStop(1,"rgba(10,8,5,0.9)"); }
-  else if (isSidelit) { pg.addColorStop(0,"rgba(220,190,160,1)"); pg.addColorStop(0.5,"rgba(160,130,100,1)"); pg.addColorStop(1,"rgba(80,60,40,0.9)"); }
-  else if (isTopLight) { pg.addColorStop(0,"rgba(230,200,170,1)"); pg.addColorStop(0.3,"rgba(170,140,115,1)"); pg.addColorStop(1,"rgba(100,80,60,0.9)"); }
-  else { pg.addColorStop(0,"rgba(200,175,155,1)"); pg.addColorStop(1,"rgba(150,120,100,1)"); }
+  const pg=ctx.createRadialGradient(CX-nx*7,CY-ny*7,0,CX,CY,SR*1.8);
+  if (isBacklit){pg.addColorStop(0,"rgba(28,18,12,1)");pg.addColorStop(1,"rgba(10,7,4,0.9)");}
+  else if(isSidelit){pg.addColorStop(0,"rgba(218,188,158,1)");pg.addColorStop(0.5,"rgba(158,128,98,1)");pg.addColorStop(1,"rgba(78,58,38,0.9)");}
+  else if(isTopLight){pg.addColorStop(0,"rgba(228,198,168,1)");pg.addColorStop(0.3,"rgba(168,138,112,1)");pg.addColorStop(1,"rgba(98,78,58,0.9)");}
+  else{pg.addColorStop(0,"rgba(198,172,152,1)");pg.addColorStop(1,"rgba(148,118,98,1)");}
 
-  if (fillLight > 0 && isBacklit) {
-    const fr = fillLight/100;
-    const fg = ctx.createRadialGradient(CX,CY+30,0,CX,CY,SR*2);
-    fg.addColorStop(0,`rgba(255,220,180,${fr*0.6})`); fg.addColorStop(1,"rgba(255,220,180,0)");
-    ctx.fillStyle = fg; ctx.beginPath(); ctx.arc(CX,CY,SR*2.5,0,Math.PI*2); ctx.fill();
+  if (fillLight>0&&isBacklit){
+    const fr=fillLight/100;
+    const fg=ctx.createRadialGradient(CX,CY+28,0,CX,CY,SR*2);
+    fg.addColorStop(0,`rgba(255,220,180,${fr*0.6})`);fg.addColorStop(1,"rgba(255,220,180,0)");
+    ctx.fillStyle=fg;ctx.beginPath();ctx.arc(CX,CY,SR*2.5,0,Math.PI*2);ctx.fill();
   }
+  ctx.fillStyle=pg;
+  ctx.beginPath();ctx.ellipse(CX,CY+7,SR*0.55,SR*0.9,0,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.arc(CX,CY-SR*0.6,SR*0.44,0,Math.PI*2);ctx.fill();
 
-  ctx.fillStyle = pg;
-  ctx.beginPath(); ctx.ellipse(CX,CY+8,SR*0.55,SR*0.9,0,0,Math.PI*2); ctx.fill();
-  ctx.beginPath(); ctx.arc(CX,CY-SR*0.6,SR*0.45,0,Math.PI*2); ctx.fill();
-
-  if (showRim && isBacklit) {
-    const fillRatio = fillLight/150;
-    const rimStr = rimStrengthBase * (1 - fillRatio);
-    if (!isTopLight) {
-      const rg = ctx.createRadialGradient(CX+nx*SR*0.8, CY+ny*SR*0.8, 0, CX, CY, SR*1.4);
-      rg.addColorStop(0,"rgba(0,0,0,0)"); rg.addColorStop(0.6,"rgba(0,0,0,0)");
-      rg.addColorStop(0.85, rgbStr(sc, 0.7*rimStr)); rg.addColorStop(1, rgbStr(sc, 0.9*rimStr));
-      ctx.fillStyle = rg;
-      ctx.beginPath(); ctx.arc(CX,CY-SR*0.6,SR*0.55,0,Math.PI*2); ctx.fill();
-      ctx.beginPath(); ctx.ellipse(CX,CY+8,SR*0.65,SR*1.0,0,0,Math.PI*2); ctx.fill();
+  if (showRim&&isBacklit){
+    const fr2=fillLight/150, rimStr=rimStrengthBase*(1-fr2);
+    if (!isTopLight){
+      const rg=ctx.createRadialGradient(CX+nx*SR*0.8,CY+ny*SR*0.8,0,CX,CY,SR*1.4);
+      rg.addColorStop(0,"rgba(0,0,0,0)");rg.addColorStop(0.6,"rgba(0,0,0,0)");
+      rg.addColorStop(0.85,rgbStr(sc,0.7*rimStr));rg.addColorStop(1,rgbStr(sc,0.9*rimStr));
+      ctx.fillStyle=rg;ctx.beginPath();ctx.arc(CX,CY-SR*0.6,SR*0.55,0,Math.PI*2);ctx.fill();
+      ctx.beginPath();ctx.ellipse(CX,CY+7,SR*0.65,SR*1.0,0,0,Math.PI*2);ctx.fill();
     }
-    if (sunElevation > 35) {
-      const topStr = (sunElevation-35)/55 * rimStr;
-      const tg = ctx.createRadialGradient(CX,CY-SR*0.6,0,CX,CY-SR*0.6,SR*0.6);
-      tg.addColorStop(0,rgbStr(sc,0)); tg.addColorStop(0.5,rgbStr(sc,0));
-      tg.addColorStop(0.8,rgbStr(sc,0.6*topStr)); tg.addColorStop(1,rgbStr(sc,0.9*topStr));
-      ctx.fillStyle = tg; ctx.beginPath(); ctx.arc(CX,CY-SR*0.6,SR*0.6,0,Math.PI*2); ctx.fill();
+    if (sunElevation>35){
+      const ts=(sunElevation-35)/55*rimStr;
+      const tg=ctx.createRadialGradient(CX,CY-SR*0.6,0,CX,CY-SR*0.6,SR*0.6);
+      tg.addColorStop(0,rgbStr(sc,0));tg.addColorStop(0.5,rgbStr(sc,0));
+      tg.addColorStop(0.8,rgbStr(sc,0.6*ts));tg.addColorStop(1,rgbStr(sc,0.9*ts));
+      ctx.fillStyle=tg;ctx.beginPath();ctx.arc(CX,CY-SR*0.6,SR*0.6,0,Math.PI*2);ctx.fill();
     }
   }
 
-  ctx.shadowBlur = 20; ctx.shadowColor = rgbStr(sc);
-  ctx.fillStyle = rgbStr(sc);
-  ctx.beginPath(); ctx.arc(sunX,sunY,16,0,Math.PI*2); ctx.fill();
-  ctx.shadowBlur = 0;
-  ctx.fillStyle = "rgba(255,255,255,0.95)"; ctx.font = "bold 11px monospace"; ctx.textAlign = "center";
-  ctx.fillText("☀", sunX, sunY+4);
+  ctx.shadowBlur=18;ctx.shadowColor=rgbStr(sc);
+  ctx.fillStyle=rgbStr(sc);ctx.beginPath();ctx.arc(sunX,sunY,15,0,Math.PI*2);ctx.fill();
+  ctx.shadowBlur=0;
+  ctx.fillStyle="rgba(255,255,255,0.95)";ctx.font="bold 10px monospace";ctx.textAlign="center";
+  ctx.fillText("☀",sunX,sunY+4);
 
   // 고도 다이어그램
-  const diagX=28, diagBaseY=H-50, diagH=65;
-  ctx.strokeStyle="rgba(255,255,255,0.12)"; ctx.lineWidth=1;
-  ctx.beginPath(); ctx.moveTo(diagX,diagBaseY-diagH); ctx.lineTo(diagX,diagBaseY); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(diagX-5,diagBaseY); ctx.lineTo(diagX+45,diagBaseY); ctx.stroke();
-  ctx.fillStyle="rgba(255,255,255,0.25)"; ctx.font="8px monospace"; ctx.textAlign="left";
-  ctx.fillText("지평선", diagX+8, diagBaseY+10);
-  const elevRad2 = sunElevation * DEG;
-  const eX = diagX + Math.cos(elevRad2)*40, eY = diagBaseY - Math.sin(elevRad2)*40;
-  ctx.strokeStyle=rgbStr(sc,0.9); ctx.lineWidth=2;
-  ctx.beginPath(); ctx.moveTo(diagX,diagBaseY); ctx.lineTo(eX,eY); ctx.stroke();
-  ctx.fillStyle=rgbStr(sc); ctx.beginPath(); ctx.arc(eX,eY,4,0,Math.PI*2); ctx.fill();
-  ctx.strokeStyle=rgbStr(sc,0.3); ctx.lineWidth=1;
-  ctx.beginPath(); ctx.arc(diagX,diagBaseY,18,-Math.PI/2,-(sunElevation*DEG)-Math.PI/2,false); ctx.stroke();
-  ctx.fillStyle=rgbStr(sc,0.8); ctx.font="9px monospace"; ctx.textAlign="left";
-  ctx.fillText(`${sunElevation}°`, diagX+3, diagBaseY-diagH-4);
+  const dX=26,dBY=H-46,dH=60;
+  ctx.strokeStyle="rgba(255,255,255,0.12)";ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(dX,dBY-dH);ctx.lineTo(dX,dBY);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(dX-4,dBY);ctx.lineTo(dX+42,dBY);ctx.stroke();
+  ctx.fillStyle="rgba(255,255,255,0.2)";ctx.font="8px monospace";ctx.textAlign="left";
+  ctx.fillText("지평선",dX+7,dBY+9);
+  const eRad=sunElevation*DEG;
+  const eX=dX+Math.cos(eRad)*38,eY=dBY-Math.sin(eRad)*38;
+  ctx.strokeStyle=rgbStr(sc,0.9);ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(dX,dBY);ctx.lineTo(eX,eY);ctx.stroke();
+  ctx.fillStyle=rgbStr(sc);ctx.beginPath();ctx.arc(eX,eY,3.5,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle=rgbStr(sc,0.3);ctx.lineWidth=1;
+  ctx.beginPath();ctx.arc(dX,dBY,16,-Math.PI/2,-(sunElevation*DEG)-Math.PI/2,false);ctx.stroke();
+  ctx.fillStyle=rgbStr(sc,0.8);ctx.font="9px monospace";ctx.textAlign="left";
+  ctx.fillText(sunElevation+'°',dX+2,dBY-dH-3);
 
   ctx.fillStyle="#e0e0ff";
-  ctx.beginPath(); ctx.roundRect(CX-14,CAM_Y-10,28,20,4); ctx.fill();
-  ctx.fillStyle="#1a1a2e"; ctx.beginPath(); ctx.arc(CX,CAM_Y,6,0,Math.PI*2); ctx.fill();
-  ctx.fillStyle="#4a9eff"; ctx.beginPath(); ctx.arc(CX,CAM_Y,3,0,Math.PI*2); ctx.fill();
-  ctx.strokeStyle="rgba(100,150,255,0.3)"; ctx.lineWidth=1; ctx.setLineDash([4,4]);
-  ctx.beginPath(); ctx.moveTo(CX,CAM_Y-10); ctx.lineTo(CX,CY+SR); ctx.stroke();
-  ctx.setLineDash([]);
-  ctx.fillStyle="rgba(255,255,255,0.4)"; ctx.font="10px monospace"; ctx.textAlign="center";
-  ctx.fillText("CAMERA",CX,CAM_Y+22); ctx.fillText("SUBJECT",CX,CY+SR+18);
+  ctx.beginPath();ctx.roundRect(CX-13,CAM_Y-9,26,18,4);ctx.fill();
+  ctx.fillStyle="#1a1a2e";ctx.beginPath();ctx.arc(CX,CAM_Y,5.5,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle="#4a9eff";ctx.beginPath();ctx.arc(CX,CAM_Y,2.5,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle="rgba(100,150,255,0.3)";ctx.lineWidth=1;ctx.setLineDash([3,3]);
+  ctx.beginPath();ctx.moveTo(CX,CAM_Y-9);ctx.lineTo(CX,CY+SR);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle="rgba(255,255,255,0.4)";ctx.font="9px monospace";ctx.textAlign="center";
+  ctx.fillText("CAMERA",CX,CAM_Y+20);ctx.fillText("SUBJECT",CX,CY+SR+16);
 }
 
+// ==========================================
+// PREVIEW 캔버스
+// ==========================================
 function drawPreview(sunElevation, fillLight, isBacklit, isSidelit, isTopLight, rimStrengthBase, sc) {
-  const canvas = document.getElementById('previewCanvas');
-  const ctx = canvas.getContext('2d');
-  const PW=160, PH=200;
-  const isGoldenHour = sunElevation < 20;
+  const canvas=document.getElementById('previewCanvas');
+  const ctx=canvas.getContext('2d');
+  const PW=150,PH=190;
+  const isGoldenHour=sunElevation<20&&sunElevation>0;
   ctx.clearRect(0,0,PW,PH);
 
-  if (isBacklit) {
-    const bg = ctx.createLinearGradient(0,0,0,PH);
-    bg.addColorStop(0, rgbStr(sc,0.9));
-    bg.addColorStop(0.5, `rgba(${Math.round(lerp(sc.r,180,0.4))},${Math.round(lerp(sc.g,160,0.4))},${Math.round(lerp(sc.b,130,0.4))},0.5)`);
-    bg.addColorStop(1,"rgba(40,35,30,1)");
-    ctx.fillStyle=bg; ctx.fillRect(0,0,PW,PH);
-  } else if (isSidelit) {
-    const bg = ctx.createLinearGradient(0,0,PW,0);
-    bg.addColorStop(0,rgbStr(sc,0.5)); bg.addColorStop(0.5,"rgba(180,160,140,0.8)"); bg.addColorStop(1,"rgba(60,50,40,0.9)");
-    ctx.fillStyle=bg; ctx.fillRect(0,0,PW,PH);
+  if(isBacklit){
+    const bg=ctx.createLinearGradient(0,0,0,PH);
+    bg.addColorStop(0,rgbStr(sc,0.9));
+    bg.addColorStop(0.5,`rgba(${Math.round(lerp(sc.r,175,0.4))},${Math.round(lerp(sc.g,155,0.4))},${Math.round(lerp(sc.b,128,0.4))},0.5)`);
+    bg.addColorStop(1,"rgba(38,32,28,1)");
+    ctx.fillStyle=bg;ctx.fillRect(0,0,PW,PH);
+  } else if(isSidelit){
+    const bg=ctx.createLinearGradient(0,0,PW,0);
+    bg.addColorStop(0,rgbStr(sc,0.5));bg.addColorStop(0.5,"rgba(178,158,138,0.8)");bg.addColorStop(1,"rgba(58,48,38,0.9)");
+    ctx.fillStyle=bg;ctx.fillRect(0,0,PW,PH);
   } else {
-    const coolness = sunElevation/90;
-    const tr=Math.round(lerp(220,200,coolness)), tg2=Math.round(lerp(210,215,coolness)), tb=Math.round(lerp(190,230,coolness));
-    const bg = ctx.createLinearGradient(0,0,0,PH);
-    bg.addColorStop(0,`rgb(${tr},${tg2},${tb})`); bg.addColorStop(1,"rgba(140,150,140,1)");
-    ctx.fillStyle=bg; ctx.fillRect(0,0,PW,PH);
+    const cool=sunElevation/90;
+    const tr=Math.round(lerp(218,198,cool)),tg=Math.round(lerp(208,213,cool)),tb=Math.round(lerp(188,228,cool));
+    const bg=ctx.createLinearGradient(0,0,0,PH);
+    bg.addColorStop(0,`rgb(${tr},${tg},${tb})`);bg.addColorStop(1,"rgba(138,148,138,1)");
+    ctx.fillStyle=bg;ctx.fillRect(0,0,PW,PH);
   }
 
-  for (let i=0;i<8;i++) {
-    const bx=20+i*18+Math.sin(i*1.5)*10, by=30+Math.cos(i*2)*20, br=8+Math.sin(i)*4;
-    const bg2 = ctx.createRadialGradient(bx,by,0,bx,by,br);
-    bg2.addColorStop(0,rgbStr(sc,isBacklit?0.6:0.15)); bg2.addColorStop(1,rgbStr(sc,0));
-    ctx.fillStyle=bg2; ctx.beginPath(); ctx.arc(bx,by,br,0,Math.PI*2); ctx.fill();
+  for(let i=0;i<8;i++){
+    const bx=18+i*17+Math.sin(i*1.5)*9,by=28+Math.cos(i*2)*18,br=7+Math.sin(i)*3.5;
+    const bg2=ctx.createRadialGradient(bx,by,0,bx,by,br);
+    bg2.addColorStop(0,rgbStr(sc,isBacklit?0.6:0.12));bg2.addColorStop(1,rgbStr(sc,0));
+    ctx.fillStyle=bg2;ctx.beginPath();ctx.arc(bx,by,br,0,Math.PI*2);ctx.fill();
   }
 
-  const px=PW/2, py=PH*0.55, pr=18;
-  const fillRatio=fillLight/100;
+  const px=PW/2,py=PH*0.55,pr=17;
+  const fr=fillLight/100;
   let skin;
-  if (isBacklit) {
-    skin = {r:Math.round(lerp(22,200,fillRatio*0.7)), g:Math.round(lerp(15,168,fillRatio*0.7)), b:Math.round(lerp(10,138,fillRatio*0.7))};
-  } else if (isTopLight) { skin={r:170,g:140,b:118}; }
-  else { skin={r:200,g:170,b:145}; }
+  if(isBacklit){skin={r:Math.round(lerp(20,198,fr*0.7)),g:Math.round(lerp(13,165,fr*0.7)),b:Math.round(lerp(8,135,fr*0.7))};}
+  else if(isTopLight){skin={r:168,g:138,b:115};}
+  else{skin={r:198,g:168,b:142};}
 
   ctx.fillStyle=`rgb(${skin.r},${skin.g},${skin.b})`;
-  ctx.beginPath(); ctx.ellipse(px,py+10,pr*0.6,pr*1.0,0,0,Math.PI*2); ctx.fill();
-  ctx.beginPath(); ctx.arc(px,py-pr*0.5,pr*0.5,0,Math.PI*2); ctx.fill();
+  ctx.beginPath();ctx.ellipse(px,py+9,pr*0.6,pr*1.0,0,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.arc(px,py-pr*0.5,pr*0.5,0,Math.PI*2);ctx.fill();
 
-  if (isTopLight) {
-    const tlg = ctx.createLinearGradient(0,py-pr*1.5,0,py);
-    tlg.addColorStop(0,rgbStr(sc,0.5)); tlg.addColorStop(0.4,rgbStr(sc,0.1)); tlg.addColorStop(1,"rgba(0,0,0,0)");
-    ctx.fillStyle=tlg; ctx.beginPath(); ctx.arc(px,py-pr*0.5,pr*0.6,0,Math.PI*2); ctx.fill();
-    const es = ctx.createLinearGradient(0,py-pr*0.3,0,py+pr*0.5);
-    es.addColorStop(0,"rgba(0,0,0,0.25)"); es.addColorStop(1,"rgba(0,0,0,0)");
-    ctx.fillStyle=es; ctx.beginPath(); ctx.ellipse(px,py,pr*0.5,pr*0.5,0,0,Math.PI*2); ctx.fill();
+  if(isTopLight){
+    const tlg=ctx.createLinearGradient(0,py-pr*1.5,0,py);
+    tlg.addColorStop(0,rgbStr(sc,0.5));tlg.addColorStop(0.4,rgbStr(sc,0.1));tlg.addColorStop(1,"rgba(0,0,0,0)");
+    ctx.fillStyle=tlg;ctx.beginPath();ctx.arc(px,py-pr*0.5,pr*0.6,0,Math.PI*2);ctx.fill();
+    const es=ctx.createLinearGradient(0,py-pr*0.3,0,py+pr*0.4);
+    es.addColorStop(0,"rgba(0,0,0,0.25)");es.addColorStop(1,"rgba(0,0,0,0)");
+    ctx.fillStyle=es;ctx.beginPath();ctx.ellipse(px,py,pr*0.5,pr*0.45,0,0,Math.PI*2);ctx.fill();
   }
 
-  if (isBacklit && showRim) {
-    const rimStr = rimStrengthBase*(1-fillRatio*0.6);
-    if (!isTopLight) {
-      const rg = ctx.createRadialGradient(px,py-pr*0.5,pr*0.1,px,py-pr*0.5,pr*0.8);
-      rg.addColorStop(0,"rgba(0,0,0,0)"); rg.addColorStop(0.6,"rgba(0,0,0,0)");
-      rg.addColorStop(0.85,rgbStr(sc,0.7*rimStr)); rg.addColorStop(1,rgbStr(sc,0.9*rimStr));
-      ctx.fillStyle=rg; ctx.beginPath(); ctx.arc(px,py-pr*0.5,pr*0.8,0,Math.PI*2); ctx.fill();
+  if(isBacklit&&showRim){
+    const rimStr=rimStrengthBase*(1-fr*0.6);
+    if(!isTopLight){
+      const rg=ctx.createRadialGradient(px,py-pr*0.5,pr*0.1,px,py-pr*0.5,pr*0.8);
+      rg.addColorStop(0,"rgba(0,0,0,0)");rg.addColorStop(0.6,"rgba(0,0,0,0)");
+      rg.addColorStop(0.85,rgbStr(sc,0.7*rimStr));rg.addColorStop(1,rgbStr(sc,0.9*rimStr));
+      ctx.fillStyle=rg;ctx.beginPath();ctx.arc(px,py-pr*0.5,pr*0.8,0,Math.PI*2);ctx.fill();
     }
-    if (sunElevation > 35) {
-      const topStr=(sunElevation-35)/55*rimStr;
-      const tg = ctx.createLinearGradient(0,py-pr*1.5,0,py-pr*0.2);
-      tg.addColorStop(0,rgbStr(sc,0.8*topStr)); tg.addColorStop(1,"rgba(0,0,0,0)");
-      ctx.fillStyle=tg; ctx.beginPath(); ctx.arc(px,py-pr*0.5,pr*0.6,0,Math.PI*2); ctx.fill();
+    if(sunElevation>35){
+      const ts=(sunElevation-35)/55*rimStr;
+      const tg=ctx.createLinearGradient(0,py-pr*1.5,0,py-pr*0.2);
+      tg.addColorStop(0,rgbStr(sc,0.8*ts));tg.addColorStop(1,"rgba(0,0,0,0)");
+      ctx.fillStyle=tg;ctx.beginPath();ctx.arc(px,py-pr*0.5,pr*0.6,0,Math.PI*2);ctx.fill();
     }
   }
 
-  if (isBacklit) {
-    const fg = ctx.createRadialGradient(PW/2,0,0,PW/2,0,PH*0.8);
-    fg.addColorStop(0,rgbStr(sc,0.4)); fg.addColorStop(0.5,rgbStr(sc,0.1)); fg.addColorStop(1,"rgba(0,0,0,0)");
-    ctx.fillStyle=fg; ctx.fillRect(0,0,PW,PH);
+  if(isBacklit){
+    const fg=ctx.createRadialGradient(PW/2,0,0,PW/2,0,PH*0.8);
+    fg.addColorStop(0,rgbStr(sc,0.4));fg.addColorStop(0.5,rgbStr(sc,0.1));fg.addColorStop(1,"rgba(0,0,0,0)");
+    ctx.fillStyle=fg;ctx.fillRect(0,0,PW,PH);
   }
 }
 
-// 초기 실행
-update();
+// 초기화
+setSeason('summer');
+document.getElementById('timeSlider').value = 40;
+onTimeSlider();
 </script>
 </body>
 </html>
