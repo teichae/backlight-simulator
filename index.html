@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>역광 시뮬레이터</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: linear-gradient(135deg, #0a0a1a 0%, #0d1020 100%);
+    min-height: 100vh;
+    font-family: 'Courier New', monospace;
+    color: #e0e0f0;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+  h1 { font-size: 20px; color: #c0d0ff; letter-spacing: 2px; }
+  .subtitle { font-size: 10px; letter-spacing: 4px; color: #4a6080; margin-bottom: 4px; }
+  #status-box {
+    background: rgba(255,255,255,0.05);
+    border-radius: 8px;
+    padding: 10px 20px;
+    text-align: center;
+    width: 100%;
+    max-width: 580px;
+    transition: border-color 0.3s;
+  }
+  #status-label { font-size: 13px; font-weight: bold; letter-spacing: 2px; }
+  #status-desc { font-size: 11px; color: #8090a0; margin-top: 4px; }
+  .canvas-row {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .canvas-label { font-size: 10px; color: #4a6080; letter-spacing: 2px; margin-bottom: 6px; text-align: center; }
+  #topCanvas { border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); display: block; }
+  #previewCanvas { border-radius: 10px; border: 1px solid rgba(255,255,255,0.08); display: block; width: 100%; }
+  .side-panel { display: flex; flex-direction: column; gap: 12px; width: 180px; }
+  .info-box {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 11px;
+  }
+  .info-title { color: #4a6080; margin-bottom: 8px; letter-spacing: 1px; }
+  .info-row { display: flex; justify-content: space-between; margin-bottom: 5px; }
+  .info-key { color: #606880; }
+  .control-panel {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 12px;
+    padding: 20px;
+    width: 100%;
+    max-width: 580px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .ctrl-row { display: flex; justify-content: space-between; margin-bottom: 8px; }
+  .ctrl-label { font-size: 11px; color: #8090a0; letter-spacing: 1px; }
+  .ctrl-value { font-size: 13px; font-weight: bold; }
+  input[type=range] { width: 100%; cursor: pointer; }
+  .preset-row { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+  .preset-btn {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 6px;
+    color: #607080;
+    padding: 4px 10px;
+    font-size: 11px;
+    cursor: pointer;
+    font-family: 'Courier New', monospace;
+    transition: all 0.2s;
+  }
+  .preset-btn:hover { opacity: 0.8; }
+  .sub-tip { font-size: 10px; color: #506070; margin-top: 4px; }
+  .toggle-row { display: flex; align-items: center; gap: 10px; }
+  .toggle {
+    width: 36px; height: 20px; border-radius: 10px;
+    background: rgba(255,255,255,0.1);
+    cursor: pointer; position: relative; transition: background 0.2s;
+  }
+  .toggle.on { background: #ffa040; }
+  .toggle-knob {
+    width: 16px; height: 16px; border-radius: 8px; background: white;
+    position: absolute; top: 2px; left: 2px; transition: left 0.2s;
+  }
+  .toggle.on .toggle-knob { left: 18px; }
+  .tip-box {
+    background: rgba(255,160,64,0.05);
+    border: 1px solid rgba(255,160,64,0.15);
+    border-radius: 10px;
+    padding: 14px 18px;
+    width: 100%;
+    max-width: 580px;
+  }
+  .tip-title { font-size: 10px; color: #ffa040; letter-spacing: 2px; margin-bottom: 8px; }
+  #tip-text { font-size: 11px; color: #8090a0; line-height: 1.7; }
+  .footer { font-size: 10px; color: #2a3040; letter-spacing: 1px; padding-bottom: 10px; }
+  .dim { opacity: 0.3; }
+</style>
+</head>
+<body>
+
+<div style="text-align:center">
+  <div class="subtitle">PHOTOGRAPHY SIMULATOR v2</div>
+  <h1>역광 + 고도 시뮬레이터</h1>
+</div>
+
+<div id="status-box">
+  <div id="status-label">—</div>
+  <div id="status-desc">—</div>
+</div>
+
+<div class="canvas-row">
+  <div>
+    <div class="canvas-label">TOP VIEW — 수평구도 + 좌하단 고도계</div>
+    <canvas id="topCanvas" width="380" height="380"></canvas>
+  </div>
+  <div class="side-panel">
+    <div>
+      <div class="canvas-label">PREVIEW</div>
+      <canvas id="previewCanvas" width="160" height="200"></canvas>
+    </div>
+    <div class="info-box">
+      <div class="info-title">LIGHT INFO</div>
+      <div class="info-row"><span class="info-key">림라이트</span><span id="info-rim">—</span></div>
+      <div class="info-row"><span class="info-key">빛 색온도</span><span id="info-temp">—</span></div>
+      <div class="info-row"><span class="info-key">그림자길이</span><span id="info-shadow">—</span></div>
+      <div class="info-row"><span class="info-key">추천여부</span><span id="info-rec">—</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="control-panel">
+  <!-- 수평방향 -->
+  <div>
+    <div class="ctrl-row">
+      <span class="ctrl-label">↔ 태양 수평 방향</span>
+      <span class="ctrl-value" id="angle-val" style="color:#ffa040">180°</span>
+    </div>
+    <input type="range" id="angleSlider" min="0" max="359" value="180" oninput="update()">
+    <div class="preset-row">
+      <button class="preset-btn" onclick="setAngle(180)" data-angle="180">역광</button>
+      <button class="preset-btn" onclick="setAngle(135)" data-angle="135">좌역광</button>
+      <button class="preset-btn" onclick="setAngle(225)" data-angle="225">우역광</button>
+      <button class="preset-btn" onclick="setAngle(90)" data-angle="90">사이드</button>
+      <button class="preset-btn" onclick="setAngle(0)" data-angle="0">순광</button>
+    </div>
+  </div>
+
+  <!-- 고도 -->
+  <div>
+    <div class="ctrl-row">
+      <span class="ctrl-label">↕ 태양 고도 (높이)</span>
+      <span class="ctrl-value" id="elev-val" style="color:#e0c080">15°</span>
+    </div>
+    <input type="range" id="elevSlider" min="0" max="90" value="15" oninput="update()">
+    <div class="preset-row">
+      <button class="preset-btn" onclick="setElev(5)" data-elev="5">일출/일몰 5°</button>
+      <button class="preset-btn" onclick="setElev(25)" data-elev="25">오전 10시 25°</button>
+      <button class="preset-btn" onclick="setElev(45)" data-elev="45">오후 3시 45°</button>
+      <button class="preset-btn" onclick="setElev(80)" data-elev="80">정오 80°</button>
+    </div>
+  </div>
+
+  <!-- 필 라이트 -->
+  <div id="fill-section">
+    <div class="ctrl-row">
+      <span class="ctrl-label">⚡ 필 라이트 (스트로브/반사판)</span>
+      <span class="ctrl-value" id="fill-val" style="color:#e0a060">OFF</span>
+    </div>
+    <input type="range" id="fillSlider" min="0" max="100" value="0" oninput="update()">
+    <div class="sub-tip" id="fill-tip"></div>
+  </div>
+
+  <!-- 림라이트 토글 -->
+  <div class="toggle-row">
+    <div class="toggle on" id="rimToggle" onclick="toggleRim()">
+      <div class="toggle-knob"></div>
+    </div>
+    <span style="font-size:11px;color:#8090a0;letter-spacing:1px">림라이트 시각화</span>
+  </div>
+</div>
+
+<div class="tip-box">
+  <div class="tip-title">💡 SHOOTING TIP</div>
+  <div id="tip-text">—</div>
+</div>
+
+<div class="footer">BACKLIGHT PHOTOGRAPHY SIMULATOR v2 — 수평방향 + 태양고도</div>
+
+<script>
+const DEG = Math.PI / 180;
+let showRim = true;
+
+function lerp(a, b, t) { return a + (b - a) * t; }
+
+function sunColor(elevation) {
+  if (elevation < 10) return { r: 255, g: 120, b: 30 };
+  if (elevation < 20) return { r: 255, g: 160, b: 60 };
+  if (elevation < 40) return { r: 255, g: 200, b: 120 };
+  if (elevation < 65) return { r: 255, g: 225, b: 180 };
+  return { r: 220, g: 235, b: 255 };
+}
+
+function rgbStr(c, a = 1) { return `rgba(${c.r},${c.g},${c.b},${a})`; }
+
+function setAngle(v) {
+  document.getElementById('angleSlider').value = v;
+  update();
+}
+function setElev(v) {
+  document.getElementById('elevSlider').value = v;
+  update();
+}
+function toggleRim() {
+  showRim = !showRim;
+  const el = document.getElementById('rimToggle');
+  el.classList.toggle('on', showRim);
+  update();
+}
+
+function update() {
+  const sunAngle = parseInt(document.getElementById('angleSlider').value);
+  const sunElevation = parseInt(document.getElementById('elevSlider').value);
+  const fillLight = parseInt(document.getElementById('fillSlider').value);
+
+  const isBacklit = sunAngle > 120 && sunAngle < 240;
+  const isSidelit = (sunAngle >= 60 && sunAngle <= 120) || (sunAngle >= 240 && sunAngle <= 300);
+  const isTopLight = sunElevation > 65;
+  const isGoldenHour = sunElevation < 20;
+  const rimStrengthBase = Math.max(0.05, 1 - sunElevation / 70);
+  const sc = sunColor(sunElevation);
+
+  // --- 상태 업데이트 ---
+  let statusLabel, statusColor, statusDesc;
+  if (isTopLight && isBacklit) { statusLabel = "탑라이트 역광"; statusColor = "#c080ff"; statusDesc = "머리 위 역광 — 림라이트 매우 약함, 필 라이트 필수"; }
+  else if (isTopLight) { statusLabel = "탑라이트 ⚠ 정오"; statusColor = "#c080ff"; statusDesc = "인물 사진 최악 조건 — 눈 밑 그림자가 강하게 생김"; }
+  else if (isGoldenHour && isBacklit) { statusLabel = "골든아워 역광 ★"; statusColor = "#ff7010"; statusDesc = "가장 강렬한 림라이트 — 황금빛 윤곽 살아남"; }
+  else if (isGoldenHour) { statusLabel = "골든아워"; statusColor = "#ff9030"; statusDesc = "낮고 따뜻한 빛 — 피부가 황금빛으로 아름답게"; }
+  else if (isBacklit) { statusLabel = "역광 (BACKLIT)"; statusColor = "#ffa040"; statusDesc = "림라이트 활성화 — 인물 윤곽에 빛 발생"; }
+  else if (isSidelit) { statusLabel = "사이드광 (SIDELIT)"; statusColor = "#60c0ff"; statusDesc = "입체감 극대화 — 얼굴 명암 자연스럽게 형성"; }
+  else { statusLabel = "순광 (FRONTLIT)"; statusColor = "#90d090"; statusDesc = "얼굴 고르게 밝음 — 그림자 없지만 입체감 부족"; }
+
+  const sb = document.getElementById('status-box');
+  sb.style.borderColor = statusColor + '40';
+  sb.style.border = `1px solid ${statusColor}40`;
+  document.getElementById('status-label').style.color = statusColor;
+  document.getElementById('status-label').textContent = statusLabel;
+  document.getElementById('status-desc').textContent = statusDesc;
+
+  // 슬라이더 값 표시
+  document.getElementById('angle-val').style.color = statusColor;
+  document.getElementById('angle-val').textContent = sunAngle + '°';
+  const elevColor = isGoldenHour ? '#ff8020' : isTopLight ? '#c080ff' : '#e0c080';
+  document.getElementById('elev-val').style.color = elevColor;
+  document.getElementById('elev-val').textContent = sunAngle + '° ' + (isGoldenHour ? '☀ 골든아워' : isTopLight ? '⬆ 탑라이트' : '');
+  document.getElementById('elev-val').textContent = sunElevation + '° ' + (isGoldenHour ? '☀ 골든아워' : isTopLight ? '⬆ 탑라이트' : '');
+
+  document.getElementById('fill-val').textContent = fillLight === 0 ? 'OFF' : fillLight + '%';
+  const fs = document.getElementById('fill-section');
+  fs.className = isBacklit ? '' : 'dim';
+  document.getElementById('fillSlider').disabled = !isBacklit;
+
+  let fillTip = '';
+  if (isBacklit) {
+    if (fillLight === 0) fillTip = '필 라이트 없음 — 실루엣화';
+    else if (fillLight <= 30) fillTip = '약한 필 라이트 — 림라이트 유지 + 얼굴 살짝';
+    else if (fillLight <= 70) fillTip = '적당한 필 라이트 — 림라이트 + 얼굴 밝음 ✓ 이상적';
+    else fillTip = '⚠ 강한 필 라이트 — 인공조명 티 날 수 있음';
+  }
+  document.getElementById('fill-tip').textContent = fillTip;
+
+  // INFO BOX
+  document.getElementById('info-rim').style.color = isBacklit ? '#ffa040' : '#445566';
+  document.getElementById('info-rim').textContent = !isBacklit ? '없음' : isTopLight ? '약함' : isGoldenHour ? '★최강' : '활성';
+  document.getElementById('info-temp').style.color = rgbStr(sc);
+  document.getElementById('info-temp').textContent = isGoldenHour ? '딥웜' : isTopLight ? '쿨화이트' : '웜';
+  document.getElementById('info-shadow').style.color = '#60c0ff';
+  document.getElementById('info-shadow').textContent = isTopLight ? '짧고 강함' : isGoldenHour ? '길고 약함' : '보통';
+  const recColor = isTopLight ? '#c080ff' : (isGoldenHour && isBacklit) ? '#ff8020' : '#90d090';
+  document.getElementById('info-rec').style.color = recColor;
+  document.getElementById('info-rec').textContent = isTopLight ? '⚠ 비추' : (isGoldenHour && isBacklit) ? '★ 최고' : '✓ OK';
+
+  // 프리셋 버튼 스타일
+  document.querySelectorAll('[data-angle]').forEach(btn => {
+    const a = parseInt(btn.dataset.angle);
+    const colors = { 180: '#ffa040', 135: '#ffa060', 225: '#ffa060', 90: '#60c0ff', 0: '#90d090' };
+    const c = colors[a] || '#607080';
+    btn.style.background = sunAngle === a ? c + '20' : 'rgba(255,255,255,0.04)';
+    btn.style.borderColor = sunAngle === a ? c : 'rgba(255,255,255,0.1)';
+    btn.style.color = sunAngle === a ? c : '#607080';
+  });
+  document.querySelectorAll('[data-elev]').forEach(btn => {
+    const e = parseInt(btn.dataset.elev);
+    const colors = { 5: '#ff7010', 25: '#e0a040', 45: '#d0b060', 80: '#c080ff' };
+    const c = colors[e] || '#607080';
+    btn.style.background = sunElevation === e ? c + '20' : 'rgba(255,255,255,0.04)';
+    btn.style.borderColor = sunElevation === e ? c : 'rgba(255,255,255,0.1)';
+    btn.style.color = sunElevation === e ? c : '#607080';
+  });
+
+  // TIP
+  let tip = '';
+  if (isTopLight) tip = "정오 탑라이트는 인물 사진에서 가장 피해야 할 조건이에요. 눈 밑, 코 밑에 강한 그림자가 생깁니다. 이 시간대엔 그늘 안으로 들어가거나 건물 반사광을 활용하는 게 맞아요.";
+  else if (isGoldenHour && isBacklit && fillLight === 0) tip = "골든아워 역광 — 최고의 조건이지만 인물이 너무 어두워요. V100 화이트돔 끼고 1/8 출력으로 필 라이트를 살짝 더해주면 황금빛 림라이트 + 밝은 얼굴이 동시에 완성됩니다.";
+  else if (isGoldenHour && isBacklit && fillLight > 0 && fillLight <= 70) tip = "완벽한 골든아워 역광 + 필 라이트 세팅! 황금빛 림라이트가 살아있으면서 얼굴도 밝습니다 ✓";
+  else if (isBacklit && fillLight === 0) tip = "역광 — 인물이 실루엣화 됩니다. V100 화이트돔 끼고 1/4~1/8 출력으로 필 라이트를 더해주세요. 매뉴얼 모드로 고정하는 게 안정적이에요.";
+  else if (isBacklit && fillLight > 0 && fillLight <= 70) tip = "이상적인 역광 + 필 라이트 세팅! 림라이트로 윤곽이 살아있으면서 얼굴 밝기도 확보됩니다.";
+  else if (isBacklit && fillLight > 70) tip = "필 라이트가 너무 강해요. 인공조명 티가 날 수 있습니다. 출력을 낮추거나 거리를 멀리하세요.";
+  else if (isSidelit) tip = "사이드광은 입체감이 최고인 위치예요. 얼굴 명암이 자연스럽게 형성되어 피부 질감이 살아납니다.";
+  else tip = "순광 — 나무나 처마 아래에서는 얼룩 그림자가 생깁니다. 그늘 경계선을 찾거나 흐린 날을 활용하세요.";
+  document.getElementById('tip-text').textContent = tip;
+
+  // === 캔버스 그리기 ===
+  drawTop(sunAngle, sunElevation, fillLight, isBacklit, isSidelit, isTopLight, rimStrengthBase, sc);
+  drawPreview(sunElevation, fillLight, isBacklit, isSidelit, isTopLight, rimStrengthBase, sc);
+}
+
+function drawTop(sunAngle, sunElevation, fillLight, isBacklit, isSidelit, isTopLight, rimStrengthBase, sc) {
+  const canvas = document.getElementById('topCanvas');
+  const ctx = canvas.getContext('2d');
+  const W = 380, H = 380, CX = W/2, CY = H/2, SR = 22, CAM_Y = H-40, SUN_DIST = 140;
+
+  ctx.clearRect(0, 0, W, H);
+
+  const bg = ctx.createRadialGradient(CX, CY, 10, CX, CY, W*0.7);
+  bg.addColorStop(0, "#1a1a2e"); bg.addColorStop(1, "#0d0d1a");
+  ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+
+  ctx.strokeStyle = "rgba(255,255,255,0.04)"; ctx.lineWidth = 1;
+  for (let i = 0; i < W; i += 30) {
+    ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,H); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0,i); ctx.lineTo(W,i); ctx.stroke();
+  }
+
+  const sunRad = (sunAngle - 90) * DEG;
+  const sunX = CX + SUN_DIST * Math.cos(sunRad);
+  const sunY = CY + SUN_DIST * Math.sin(sunRad);
+  const dx = CX - sunX, dy = CY - sunY;
+  const dist = Math.sqrt(dx*dx + dy*dy);
+  const nx = dx/dist, ny = dy/dist;
+
+  const rayOpacity = lerp(0.05, 0.30, rimStrengthBase);
+  for (let i = 0; i < 12; i++) {
+    const spread = (i/11 - 0.5) * 0.6;
+    const rx = nx*Math.cos(spread) - ny*Math.sin(spread);
+    const ry = nx*Math.sin(spread) + ny*Math.cos(spread);
+    const g = ctx.createLinearGradient(sunX, sunY, sunX+rx*300, sunY+ry*300);
+    g.addColorStop(0, rgbStr(sc, rayOpacity));
+    g.addColorStop(0.4, rgbStr(sc, rayOpacity*0.3));
+    g.addColorStop(1, rgbStr(sc, 0));
+    ctx.strokeStyle = g; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(sunX,sunY); ctx.lineTo(sunX+rx*300,sunY+ry*300); ctx.stroke();
+  }
+
+  const gg = ctx.createRadialGradient(sunX,sunY,0,sunX,sunY,80);
+  gg.addColorStop(0, rgbStr(sc,0.5)); gg.addColorStop(0.3, rgbStr(sc,0.15)); gg.addColorStop(1, rgbStr(sc,0));
+  ctx.fillStyle = gg; ctx.beginPath(); ctx.arc(sunX,sunY,80,0,Math.PI*2); ctx.fill();
+
+  if (!isBacklit) {
+    const shadowLen = lerp(90, 15, sunElevation/90);
+    const sg = ctx.createLinearGradient(CX,CY,CX-nx*shadowLen,CY-ny*shadowLen);
+    sg.addColorStop(0,"rgba(0,0,0,0.5)"); sg.addColorStop(1,"rgba(0,0,0,0)");
+    ctx.fillStyle = sg;
+    ctx.beginPath(); ctx.ellipse(CX-nx*shadowLen*0.5, CY-ny*shadowLen*0.5, SR*0.8, shadowLen*0.4, Math.atan2(-ny,-nx), 0, Math.PI*2); ctx.fill();
+  }
+
+  const pg = ctx.createRadialGradient(CX-nx*8, CY-ny*8, 0, CX, CY, SR*1.8);
+  if (isBacklit) { pg.addColorStop(0,"rgba(30,20,15,1)"); pg.addColorStop(1,"rgba(10,8,5,0.9)"); }
+  else if (isSidelit) { pg.addColorStop(0,"rgba(220,190,160,1)"); pg.addColorStop(0.5,"rgba(160,130,100,1)"); pg.addColorStop(1,"rgba(80,60,40,0.9)"); }
+  else if (isTopLight) { pg.addColorStop(0,"rgba(230,200,170,1)"); pg.addColorStop(0.3,"rgba(170,140,115,1)"); pg.addColorStop(1,"rgba(100,80,60,0.9)"); }
+  else { pg.addColorStop(0,"rgba(200,175,155,1)"); pg.addColorStop(1,"rgba(150,120,100,1)"); }
+
+  if (fillLight > 0 && isBacklit) {
+    const fr = fillLight/100;
+    const fg = ctx.createRadialGradient(CX,CY+30,0,CX,CY,SR*2);
+    fg.addColorStop(0,`rgba(255,220,180,${fr*0.6})`); fg.addColorStop(1,"rgba(255,220,180,0)");
+    ctx.fillStyle = fg; ctx.beginPath(); ctx.arc(CX,CY,SR*2.5,0,Math.PI*2); ctx.fill();
+  }
+
+  ctx.fillStyle = pg;
+  ctx.beginPath(); ctx.ellipse(CX,CY+8,SR*0.55,SR*0.9,0,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(CX,CY-SR*0.6,SR*0.45,0,Math.PI*2); ctx.fill();
+
+  if (showRim && isBacklit) {
+    const fillRatio = fillLight/150;
+    const rimStr = rimStrengthBase * (1 - fillRatio);
+    if (!isTopLight) {
+      const rg = ctx.createRadialGradient(CX+nx*SR*0.8, CY+ny*SR*0.8, 0, CX, CY, SR*1.4);
+      rg.addColorStop(0,"rgba(0,0,0,0)"); rg.addColorStop(0.6,"rgba(0,0,0,0)");
+      rg.addColorStop(0.85, rgbStr(sc, 0.7*rimStr)); rg.addColorStop(1, rgbStr(sc, 0.9*rimStr));
+      ctx.fillStyle = rg;
+      ctx.beginPath(); ctx.arc(CX,CY-SR*0.6,SR*0.55,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(CX,CY+8,SR*0.65,SR*1.0,0,0,Math.PI*2); ctx.fill();
+    }
+    if (sunElevation > 35) {
+      const topStr = (sunElevation-35)/55 * rimStr;
+      const tg = ctx.createRadialGradient(CX,CY-SR*0.6,0,CX,CY-SR*0.6,SR*0.6);
+      tg.addColorStop(0,rgbStr(sc,0)); tg.addColorStop(0.5,rgbStr(sc,0));
+      tg.addColorStop(0.8,rgbStr(sc,0.6*topStr)); tg.addColorStop(1,rgbStr(sc,0.9*topStr));
+      ctx.fillStyle = tg; ctx.beginPath(); ctx.arc(CX,CY-SR*0.6,SR*0.6,0,Math.PI*2); ctx.fill();
+    }
+  }
+
+  ctx.shadowBlur = 20; ctx.shadowColor = rgbStr(sc);
+  ctx.fillStyle = rgbStr(sc);
+  ctx.beginPath(); ctx.arc(sunX,sunY,16,0,Math.PI*2); ctx.fill();
+  ctx.shadowBlur = 0;
+  ctx.fillStyle = "rgba(255,255,255,0.95)"; ctx.font = "bold 11px monospace"; ctx.textAlign = "center";
+  ctx.fillText("☀", sunX, sunY+4);
+
+  // 고도 다이어그램
+  const diagX=28, diagBaseY=H-50, diagH=65;
+  ctx.strokeStyle="rgba(255,255,255,0.12)"; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(diagX,diagBaseY-diagH); ctx.lineTo(diagX,diagBaseY); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(diagX-5,diagBaseY); ctx.lineTo(diagX+45,diagBaseY); ctx.stroke();
+  ctx.fillStyle="rgba(255,255,255,0.25)"; ctx.font="8px monospace"; ctx.textAlign="left";
+  ctx.fillText("지평선", diagX+8, diagBaseY+10);
+  const elevRad2 = sunElevation * DEG;
+  const eX = diagX + Math.cos(elevRad2)*40, eY = diagBaseY - Math.sin(elevRad2)*40;
+  ctx.strokeStyle=rgbStr(sc,0.9); ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(diagX,diagBaseY); ctx.lineTo(eX,eY); ctx.stroke();
+  ctx.fillStyle=rgbStr(sc); ctx.beginPath(); ctx.arc(eX,eY,4,0,Math.PI*2); ctx.fill();
+  ctx.strokeStyle=rgbStr(sc,0.3); ctx.lineWidth=1;
+  ctx.beginPath(); ctx.arc(diagX,diagBaseY,18,-Math.PI/2,-(sunElevation*DEG)-Math.PI/2,false); ctx.stroke();
+  ctx.fillStyle=rgbStr(sc,0.8); ctx.font="9px monospace"; ctx.textAlign="left";
+  ctx.fillText(`${sunElevation}°`, diagX+3, diagBaseY-diagH-4);
+
+  ctx.fillStyle="#e0e0ff";
+  ctx.beginPath(); ctx.roundRect(CX-14,CAM_Y-10,28,20,4); ctx.fill();
+  ctx.fillStyle="#1a1a2e"; ctx.beginPath(); ctx.arc(CX,CAM_Y,6,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle="#4a9eff"; ctx.beginPath(); ctx.arc(CX,CAM_Y,3,0,Math.PI*2); ctx.fill();
+  ctx.strokeStyle="rgba(100,150,255,0.3)"; ctx.lineWidth=1; ctx.setLineDash([4,4]);
+  ctx.beginPath(); ctx.moveTo(CX,CAM_Y-10); ctx.lineTo(CX,CY+SR); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle="rgba(255,255,255,0.4)"; ctx.font="10px monospace"; ctx.textAlign="center";
+  ctx.fillText("CAMERA",CX,CAM_Y+22); ctx.fillText("SUBJECT",CX,CY+SR+18);
+}
+
+function drawPreview(sunElevation, fillLight, isBacklit, isSidelit, isTopLight, rimStrengthBase, sc) {
+  const canvas = document.getElementById('previewCanvas');
+  const ctx = canvas.getContext('2d');
+  const PW=160, PH=200;
+  const isGoldenHour = sunElevation < 20;
+  ctx.clearRect(0,0,PW,PH);
+
+  if (isBacklit) {
+    const bg = ctx.createLinearGradient(0,0,0,PH);
+    bg.addColorStop(0, rgbStr(sc,0.9));
+    bg.addColorStop(0.5, `rgba(${Math.round(lerp(sc.r,180,0.4))},${Math.round(lerp(sc.g,160,0.4))},${Math.round(lerp(sc.b,130,0.4))},0.5)`);
+    bg.addColorStop(1,"rgba(40,35,30,1)");
+    ctx.fillStyle=bg; ctx.fillRect(0,0,PW,PH);
+  } else if (isSidelit) {
+    const bg = ctx.createLinearGradient(0,0,PW,0);
+    bg.addColorStop(0,rgbStr(sc,0.5)); bg.addColorStop(0.5,"rgba(180,160,140,0.8)"); bg.addColorStop(1,"rgba(60,50,40,0.9)");
+    ctx.fillStyle=bg; ctx.fillRect(0,0,PW,PH);
+  } else {
+    const coolness = sunElevation/90;
+    const tr=Math.round(lerp(220,200,coolness)), tg2=Math.round(lerp(210,215,coolness)), tb=Math.round(lerp(190,230,coolness));
+    const bg = ctx.createLinearGradient(0,0,0,PH);
+    bg.addColorStop(0,`rgb(${tr},${tg2},${tb})`); bg.addColorStop(1,"rgba(140,150,140,1)");
+    ctx.fillStyle=bg; ctx.fillRect(0,0,PW,PH);
+  }
+
+  for (let i=0;i<8;i++) {
+    const bx=20+i*18+Math.sin(i*1.5)*10, by=30+Math.cos(i*2)*20, br=8+Math.sin(i)*4;
+    const bg2 = ctx.createRadialGradient(bx,by,0,bx,by,br);
+    bg2.addColorStop(0,rgbStr(sc,isBacklit?0.6:0.15)); bg2.addColorStop(1,rgbStr(sc,0));
+    ctx.fillStyle=bg2; ctx.beginPath(); ctx.arc(bx,by,br,0,Math.PI*2); ctx.fill();
+  }
+
+  const px=PW/2, py=PH*0.55, pr=18;
+  const fillRatio=fillLight/100;
+  let skin;
+  if (isBacklit) {
+    skin = {r:Math.round(lerp(22,200,fillRatio*0.7)), g:Math.round(lerp(15,168,fillRatio*0.7)), b:Math.round(lerp(10,138,fillRatio*0.7))};
+  } else if (isTopLight) { skin={r:170,g:140,b:118}; }
+  else { skin={r:200,g:170,b:145}; }
+
+  ctx.fillStyle=`rgb(${skin.r},${skin.g},${skin.b})`;
+  ctx.beginPath(); ctx.ellipse(px,py+10,pr*0.6,pr*1.0,0,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(px,py-pr*0.5,pr*0.5,0,Math.PI*2); ctx.fill();
+
+  if (isTopLight) {
+    const tlg = ctx.createLinearGradient(0,py-pr*1.5,0,py);
+    tlg.addColorStop(0,rgbStr(sc,0.5)); tlg.addColorStop(0.4,rgbStr(sc,0.1)); tlg.addColorStop(1,"rgba(0,0,0,0)");
+    ctx.fillStyle=tlg; ctx.beginPath(); ctx.arc(px,py-pr*0.5,pr*0.6,0,Math.PI*2); ctx.fill();
+    const es = ctx.createLinearGradient(0,py-pr*0.3,0,py+pr*0.5);
+    es.addColorStop(0,"rgba(0,0,0,0.25)"); es.addColorStop(1,"rgba(0,0,0,0)");
+    ctx.fillStyle=es; ctx.beginPath(); ctx.ellipse(px,py,pr*0.5,pr*0.5,0,0,Math.PI*2); ctx.fill();
+  }
+
+  if (isBacklit && showRim) {
+    const rimStr = rimStrengthBase*(1-fillRatio*0.6);
+    if (!isTopLight) {
+      const rg = ctx.createRadialGradient(px,py-pr*0.5,pr*0.1,px,py-pr*0.5,pr*0.8);
+      rg.addColorStop(0,"rgba(0,0,0,0)"); rg.addColorStop(0.6,"rgba(0,0,0,0)");
+      rg.addColorStop(0.85,rgbStr(sc,0.7*rimStr)); rg.addColorStop(1,rgbStr(sc,0.9*rimStr));
+      ctx.fillStyle=rg; ctx.beginPath(); ctx.arc(px,py-pr*0.5,pr*0.8,0,Math.PI*2); ctx.fill();
+    }
+    if (sunElevation > 35) {
+      const topStr=(sunElevation-35)/55*rimStr;
+      const tg = ctx.createLinearGradient(0,py-pr*1.5,0,py-pr*0.2);
+      tg.addColorStop(0,rgbStr(sc,0.8*topStr)); tg.addColorStop(1,"rgba(0,0,0,0)");
+      ctx.fillStyle=tg; ctx.beginPath(); ctx.arc(px,py-pr*0.5,pr*0.6,0,Math.PI*2); ctx.fill();
+    }
+  }
+
+  if (isBacklit) {
+    const fg = ctx.createRadialGradient(PW/2,0,0,PW/2,0,PH*0.8);
+    fg.addColorStop(0,rgbStr(sc,0.4)); fg.addColorStop(0.5,rgbStr(sc,0.1)); fg.addColorStop(1,"rgba(0,0,0,0)");
+    ctx.fillStyle=fg; ctx.fillRect(0,0,PW,PH);
+  }
+}
+
+// 초기 실행
+update();
+</script>
+</body>
+</html>
