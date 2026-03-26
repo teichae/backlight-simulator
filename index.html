@@ -194,11 +194,11 @@ input[type=range]:disabled { cursor: not-allowed; }
     </div>
     <input type="range" id="angleSlider" min="0" max="359" value="180" oninput="update()">
     <div class="preset-row">
-      <button class="preset-btn" onclick="setAngle(180)" data-angle="180">역광</button>
-      <button class="preset-btn" onclick="setAngle(135)" data-angle="135">좌역광</button>
-      <button class="preset-btn" onclick="setAngle(225)" data-angle="225">우역광</button>
-      <button class="preset-btn" onclick="setAngle(90)" data-angle="90">사이드</button>
-      <button class="preset-btn" onclick="setAngle(0)" data-angle="0">순광</button>
+      <button type="button" class="preset-btn" onclick="setAngle(180)" data-angle="180">역광</button>
+      <button type="button" class="preset-btn" onclick="setAngle(135)" data-angle="135">좌역광</button>
+      <button type="button" class="preset-btn" onclick="setAngle(225)" data-angle="225">우역광</button>
+      <button type="button" class="preset-btn" onclick="setAngle(90)" data-angle="90">사이드</button>
+      <button type="button" class="preset-btn" onclick="setAngle(0)" data-angle="0">순광</button>
     </div>
   </div>
 
@@ -245,8 +245,8 @@ const SEASON_DATA = {
     sunrise: 6.0, sunset: 18.5,
     maxElev: 52,
     // 시간별 고도 (5시~20시)
-    hours: [5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20],
-    elevs: [0, 2,14,27,38,46,51,52,50,44,35,24,12, 2, 0, 0],
+    hours: [5,6,6.5,7,8,9,10,11,12,13,14,15,16,17,18,18.5,19,20],
+    elevs: [0, 0, 8,14,27,38,46,51,52,50,44,35,24,12, 2,  0,  0, 0],
     goldenHours: ["06:00~07:30", "17:00~18:30"],
     goldenSliders: [8, 88],
     desc: "봄은 정오 최고 52°. 오전 6~7시반, 오후 5~6시반이 황금시간대"
@@ -255,8 +255,8 @@ const SEASON_DATA = {
     name: "여름 (6~8월)", color: "#ffcc40",
     sunrise: 5.2, sunset: 19.8,
     maxElev: 76,
-    hours: [5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20],
-    elevs: [1,14,28,41,53,63,71,76,74,66,55,42,28,14, 3, 0],
+    hours: [5,5.2,6,7,8,9,10,11,12,13,14,15,16,17,18,19,19.8,20],
+    elevs: [0, 0,14,28,41,53,63,71,76,74,66,55,42,28,14, 3,  0,  0],
     goldenHours: ["05:00~07:00", "18:00~20:00"],
     goldenSliders: [3, 90],
     desc: "여름은 정오 76° 탑라이트. 이른 오전·늦은 오후에만 좋은 빛"
@@ -265,8 +265,8 @@ const SEASON_DATA = {
     name: "가을 (9~11월)", color: "#ff8030",
     sunrise: 6.2, sunset: 17.8,
     maxElev: 47,
-    hours: [6,7,8,9,10,11,12,13,14,15,16,17,18,19],
-    elevs: [0,12,24,35,43,47,47,44,38,29,18, 7, 0, 0],
+    hours: [6,6.2,7,8,9,10,11,12,13,14,15,16,17,17.8,18,19],
+    elevs: [0, 0,12,24,35,43,47,47,44,38,29,18, 7,  0,  0, 0],
     goldenHours: ["06:30~08:00", "16:00~17:30"],
     goldenSliders: [10, 85],
     desc: "가을은 정오 47°로 봄과 비슷. 황금시간대가 길고 빛이 따뜻함"
@@ -275,8 +275,8 @@ const SEASON_DATA = {
     name: "겨울 (12~2월)", color: "#80c0ff",
     sunrise: 7.7, sunset: 17.3,
     maxElev: 29,
-    hours: [7,8,9,10,11,12,13,14,15,16,17,18],
-    elevs: [0, 4,13,21,27,29,28,23,15, 6, 0, 0],
+    hours: [7,7.7,8,9,10,11,12,13,14,15,16,17,17.3,18],
+    elevs: [0, 0, 4,13,21,27,29,28,23,15, 6, 0,  0,  0],
     goldenHours: ["07:30~09:00", "15:00~17:00"],
     goldenSliders: [15, 80],
     desc: "겨울은 정오도 29°! 하루 종일 낮은 빛 — 인물 사진 황금 시즌"
@@ -460,9 +460,10 @@ function update() {
   const hour = sliderToHour(sliderVal, currentSeason);
   const d = SEASON_DATA[currentSeason];
 
-  const isBacklit = sunAngle > 120 && sunAngle < 240;
-  const isSidelit = (sunAngle >= 60 && sunAngle <= 120) || (sunAngle >= 240 && sunAngle <= 300);
+  const isBacklit = sunAngle >= 120 && sunAngle <= 240;
+  const isSidelit = (sunAngle >= 60 && sunAngle < 120) || (sunAngle > 240 && sunAngle <= 300);
   const isTopLight = sunElevation > 65;
+  const isHighSun = sunElevation > 45 && sunElevation <= 65;
   const isGoldenHour = sunElevation < 20 && sunElevation > 0;
   const rimStrengthBase = Math.max(0.05, 1 - sunElevation / 70);
   const sc = sunColor(sunElevation);
@@ -470,28 +471,81 @@ function update() {
   // 시간 표시
   const timeStr = hourToStr(hour);
   let timePeriod = '';
-  if (sunElevation === 0) timePeriod = '일출 / 일몰';
+  if (sunElevation === 0) timePeriod = sliderVal <= 50 ? '🌅 일출' : '🌇 일몰';
   else if (isGoldenHour) timePeriod = '☀ 골든아워 — 인물 촬영 최고의 시간!';
-  else if (sunElevation < 35) timePeriod = '오전 이른 시간 / 오후 늦은 시간';
-  else if (isTopLight) timePeriod = '⚠ 정오 전후 — 탑라이트 주의';
+  else if (sunElevation < 35) timePeriod = '좋은 빛 — 부드러운 그림자';
+  else if (isTopLight) timePeriod = '🚫 정오 — 탑라이트, 인물 비추';
+  else if (isHighSun) timePeriod = '⚠ 높은 태양 — 그림자 주의';
   else timePeriod = '오전 / 오후';
 
   document.getElementById('time-display').textContent = timeStr;
-  document.getElementById('time-display').style.color = isGoldenHour ? '#ff8020' : isTopLight ? '#c080ff' : '#c0d0ff';
+  document.getElementById('time-display').style.color = isGoldenHour ? '#ff8020' : isTopLight ? '#c080ff' : isHighSun ? '#e07040' : '#c0d0ff';
   document.getElementById('time-sublabel').textContent = `고도 ${sunElevation}° | ${timePeriod}`;
 
   updateCursor();
 
   // 상태
   let statusLabel, statusColor, statusDesc;
-  if (sunElevation === 0) { statusLabel = "일출 / 일몰"; statusColor = "#ff6010"; statusDesc = "태양이 지평선에 걸쳐있음 — 극적인 실루엣 가능"; }
-  else if (isTopLight && isBacklit) { statusLabel = "탑라이트 역광"; statusColor = "#c080ff"; statusDesc = "머리 위 역광 — 림라이트 매우 약함, 필 라이트 필수"; }
-  else if (isTopLight) { statusLabel = "탑라이트 ⚠ 정오"; statusColor = "#c080ff"; statusDesc = "인물 사진 최악 조건 — 눈 밑 그림자가 강하게 생김"; }
-  else if (isGoldenHour && isBacklit) { statusLabel = "골든아워 역광 ★"; statusColor = "#ff6010"; statusDesc = "가장 강렬한 림라이트 — 황금빛 윤곽 살아남"; }
-  else if (isGoldenHour) { statusLabel = "골든아워 ★"; statusColor = "#ff8020"; statusDesc = "낮고 따뜻한 빛 — 피부가 황금빛으로 아름답게"; }
-  else if (isBacklit) { statusLabel = "역광 (BACKLIT)"; statusColor = "#ffa040"; statusDesc = "림라이트 활성화 — 인물 윤곽에 빛 발생"; }
-  else if (isSidelit) { statusLabel = "사이드광 (SIDELIT)"; statusColor = "#60c0ff"; statusDesc = "입체감 극대화 — 얼굴 명암 자연스럽게 형성"; }
-  else { statusLabel = "순광 (FRONTLIT)"; statusColor = "#90d090"; statusDesc = "얼굴 고르게 밝음 — 그림자 없지만 입체감 부족"; }
+  if (sunElevation === 0) {
+    statusLabel = sliderVal <= 50 ? "🌅 일출" : "🌇 일몰"; statusColor = "#ff6010";
+    statusDesc = "태양이 지평선에 걸쳐있음 — 극적인 실루엣 가능";
+  }
+  // === 탑라이트 (65°+) ===
+  else if (isTopLight && isBacklit) {
+    statusLabel = "🚫 탑라이트 역광"; statusColor = "#c080ff";
+    statusDesc = "머리 위 역광 — 림라이트 거의 없음, 최악 조건";
+  }
+  else if (isTopLight) {
+    statusLabel = "🚫 탑라이트"; statusColor = "#c080ff";
+    statusDesc = "인물 최악 조건 — 눈·코·턱 밑 강한 그림자, 그늘로 이동 필수";
+  }
+  // === 높은 태양 (45~65°) ===
+  else if (isHighSun && !isBacklit && !isSidelit) {
+    statusLabel = "⚠ 높은 순광"; statusColor = "#e07040";
+    statusDesc = "눈 밑·코 밑 그림자 뚜렷 — 인물 비추, 그늘을 찾으세요";
+  }
+  else if (isHighSun && isSidelit) {
+    statusLabel = "⚠ 높은 사이드광"; statusColor = "#d09040";
+    statusDesc = "입체감은 있으나 눈 그림자 강함 — 반사판 보조 권장";
+  }
+  else if (isHighSun && isBacklit && fillLight === 0) {
+    statusLabel = "⚠ 높은 역광 (필 없음)"; statusColor = "#d09040";
+    statusDesc = "림라이트 약함 + 실루엣 — 필 라이트 필수";
+  }
+  else if (isHighSun && isBacklit && fillLight > 0) {
+    statusLabel = "높은 역광 + 필"; statusColor = "#c0a050";
+    statusDesc = "림라이트 약하지만 필 라이트로 보완 가능";
+  }
+  // === 골든아워 (0~20°) ===
+  else if (isGoldenHour && isBacklit) {
+    statusLabel = "★ 골든아워 역광"; statusColor = "#ff6010";
+    statusDesc = "가장 강렬한 림라이트 — 황금빛 윤곽이 살아남";
+  }
+  else if (isGoldenHour && isSidelit) {
+    statusLabel = "★ 골든아워 사이드광"; statusColor = "#ff8020";
+    statusDesc = "따뜻한 빛 + 부드러운 입체감 — 인물 최고 조건";
+  }
+  else if (isGoldenHour) {
+    statusLabel = "★ 골든아워 순광"; statusColor = "#ffa030";
+    statusDesc = "따뜻하고 고른 빛 — 피부톤 예쁘게 나옴";
+  }
+  // === 일반 (20~45°) ===
+  else if (isBacklit && fillLight === 0) {
+    statusLabel = "역광 (필 없음)"; statusColor = "#ffa040";
+    statusDesc = "림라이트 활성 — 하지만 얼굴 어두움, 필 라이트 추가 권장";
+  }
+  else if (isBacklit && fillLight > 0) {
+    statusLabel = "✓ 역광 + 필"; statusColor = "#ffa040";
+    statusDesc = "림라이트 + 얼굴 밝기 확보 — 좋은 세팅";
+  }
+  else if (isSidelit) {
+    statusLabel = "✓ 사이드광"; statusColor = "#60c0ff";
+    statusDesc = "입체감 극대화 — 자연스러운 얼굴 명암";
+  }
+  else {
+    statusLabel = "순광"; statusColor = "#90d090";
+    statusDesc = "얼굴 고르게 밝음 — 입체감은 부족하지만 무난한 조건";
+  }
 
   const sb = document.getElementById('status-box');
   sb.style.border = `1px solid ${statusColor}40`;
@@ -518,14 +572,39 @@ function update() {
 
   // INFO BOX
   document.getElementById('info-rim').style.color = isBacklit ? '#ffa040' : '#445566';
-  document.getElementById('info-rim').textContent = !isBacklit ? '없음' : isTopLight ? '약함' : isGoldenHour ? '★최강' : '활성';
+  document.getElementById('info-rim').textContent = !isBacklit ? '없음' : isTopLight ? '거의없음' : isHighSun ? '약함' : isGoldenHour ? '★최강' : '활성';
   document.getElementById('info-temp').style.color = rgbStr(sc);
-  document.getElementById('info-temp').textContent = isGoldenHour ? '딥웜' : isTopLight ? '쿨화이트' : '웜';
+  document.getElementById('info-temp').textContent = isGoldenHour ? '딥웜' : isTopLight ? '쿨화이트' : isHighSun ? '쿨웜' : '웜';
   document.getElementById('info-shadow').style.color = '#60c0ff';
-  document.getElementById('info-shadow').textContent = isTopLight ? '짧고 강함' : isGoldenHour ? '길고 드라마틱' : '보통';
-  const recColor = isTopLight ? '#c080ff' : (isGoldenHour && isBacklit) ? '#ff6010' : '#90d090';
+  document.getElementById('info-shadow').textContent = isTopLight ? '짧고 매우강' : isHighSun ? '짧고 강함' : isGoldenHour ? '길고 드라마틱' : '부드러움';
+
+  // 추천 — 고도 + 각도 조합으로 판단
+  let recText, recColor;
+  if (isTopLight) {
+    recText = '🚫 비추'; recColor = '#ff4060';
+  } else if (isHighSun && !isBacklit && !isSidelit) {
+    recText = '🚫 비추'; recColor = '#ff4060';
+  } else if (isHighSun && isSidelit) {
+    recText = '⚠ 주의'; recColor = '#e08030';
+  } else if (isHighSun && isBacklit && fillLight === 0) {
+    recText = '⚠ 주의'; recColor = '#e08030';
+  } else if (isHighSun && isBacklit && fillLight > 0) {
+    recText = '✓ 보완됨'; recColor = '#b0a050';
+  } else if (isGoldenHour && isBacklit) {
+    recText = '★ 최고'; recColor = '#ff6010';
+  } else if (isGoldenHour) {
+    recText = '★ 추천'; recColor = '#ff8020';
+  } else if (isBacklit && fillLight === 0) {
+    recText = '⚠ 필 필요'; recColor = '#e08030';
+  } else if (isBacklit && fillLight > 0) {
+    recText = '★ 추천'; recColor = '#60d060';
+  } else if (isSidelit) {
+    recText = '✓ 좋음'; recColor = '#60c0ff';
+  } else {
+    recText = '✓ OK'; recColor = '#90d090';
+  }
   document.getElementById('info-rec').style.color = recColor;
-  document.getElementById('info-rec').textContent = isTopLight ? '⚠ 비추' : (isGoldenHour && isBacklit) ? '★ 최고' : '✓ OK';
+  document.getElementById('info-rec').textContent = recText;
 
   // 프리셋 버튼 스타일
   document.querySelectorAll('[data-angle]').forEach(btn => {
@@ -539,16 +618,22 @@ function update() {
 
   // TIP
   let tip = '';
-  if (sunElevation === 0) tip = d.name + " 일출/일몰 시간이에요. 태양이 지평선에 딱 걸려있는 순간으로 실루엣 연출에 최고이지만 촬영 가능 시간이 아주 짧아요.";
-  else if (isTopLight) tip = "정오 탑라이트는 인물 사진 최악 조건이에요. 눈 밑, 코 밑에 강한 그림자가 생깁니다. " + (currentSeason === 'winter' ? "겨울엔 정오에도 29°라 탑라이트가 없고 하루 종일 좋은 빛이에요!" : "이 시간대엔 그늘 안으로 들어가세요.");
-  else if (isGoldenHour && isBacklit && fillLight === 0) tip = "골든아워 역광 최고의 조건! 근데 인물이 너무 어두워요. V100 화이트돔 끼고 1/8 출력으로 필 라이트를 살짝 더해주면 황금빛 림라이트 + 밝은 얼굴이 동시에 완성돼요.";
+  if (sunElevation === 0) tip = d.name + (sliderVal <= 50 ? " 일출" : " 일몰") + " 시간이에요. 태양이 지평선에 딱 걸려있는 순간으로 실루엣 연출에 최고이지만 촬영 가능 시간이 아주 짧아요.";
+  else if (isTopLight) tip = "🚫 정오 탑라이트는 인물 사진 최악 조건이에요. 눈 밑, 코 밑에 강한 그림자가 생깁니다. " + (currentSeason === 'winter' ? "겨울엔 정오에도 29°라 탑라이트가 없고 하루 종일 좋은 빛이에요!" : "이 시간대엔 반드시 그늘 안으로 들어가세요. 야외 직사광 인물은 비추입니다.");
+  else if (isHighSun && !isBacklit && !isSidelit) tip = "⚠ 고도 " + sunElevation + "°는 순광이어도 눈 밑·코 밑 그림자가 뚜렷하게 생기는 각도예요. 나무 그늘이나 건물 그림자 안에서 촬영하거나, 역광/사이드광으로 방향을 바꿔보세요.";
+  else if (isHighSun && isSidelit) tip = "⚠ 고도 " + sunElevation + "°에서 사이드광은 입체감이 있지만, 눈 그림자가 강하게 생길 수 있어요. 반사판으로 그림자 쪽을 보조하거나 살짝 역광 방향으로 틀어보세요.";
+  else if (isHighSun && isBacklit && fillLight === 0) tip = "⚠ 높은 고도 역광이라 림라이트가 약하고 얼굴은 실루엣화됩니다. 스트로브나 반사판으로 필 라이트를 반드시 더해주세요.";
+  else if (isHighSun && isBacklit && fillLight > 0 && fillLight <= 70) tip = "높은 고도 역광이지만 필 라이트로 보완된 상태. 림라이트는 약하지만 얼굴 밝기는 확보됩니다. 가능하면 좀 더 해가 낮아질 때까지 기다리면 더 좋아요.";
+  else if (isHighSun && isBacklit && fillLight > 70) tip = "필 라이트가 너무 강해요. 림라이트도 약한 고도라 인공조명 느낌이 강할 수 있습니다. 출력을 낮추세요.";
+  else if (isGoldenHour && isBacklit && fillLight === 0) tip = "골든아워 역광 최고의 조건! 근데 인물이 너무 어두워요. 스트로브(1/8 출력)나 반사판으로 필 라이트를 살짝 더해주면 황금빛 림라이트 + 밝은 얼굴이 동시에 완성돼요.";
   else if (isGoldenHour && isBacklit && fillLight > 0 && fillLight <= 70) tip = "완벽한 골든아워 역광 + 필 라이트 세팅! 황금빛 림라이트가 살아있으면서 얼굴도 밝습니다 ✓ " + d.desc;
-  else if (isGoldenHour) tip = "골든아워 좋은 빛이에요! " + d.desc + " 역광 방향으로 세우면 더 드라마틱한 사진을 찍을 수 있어요.";
-  else if (isBacklit && fillLight === 0) tip = "역광 — 인물이 실루엣화됩니다. V100 화이트돔 끼고 1/4~1/8 출력으로 필 라이트를 더해주세요.";
-  else if (isBacklit && fillLight > 0 && fillLight <= 70) tip = "이상적인 역광 + 필 라이트 세팅! 림라이트로 윤곽이 살아있으면서 얼굴 밝기도 확보됩니다.";
+  else if (isGoldenHour && isBacklit && fillLight > 70) tip = "필 라이트가 너무 강해요. 골든아워 림라이트가 묻힐 수 있습니다. 출력을 낮춰 자연광을 살려주세요.";
+  else if (isGoldenHour) tip = "골든아워 좋은 빛이에요! " + d.desc + " 역광 방향으로 세우면 림라이트까지 얻을 수 있어 더 드라마틱해요.";
+  else if (isBacklit && fillLight === 0) tip = "역광 — 인물이 실루엣화됩니다. 스트로브(1/4~1/8 출력)나 반사판으로 필 라이트를 더해주세요.";
+  else if (isBacklit && fillLight > 0 && fillLight <= 70) tip = "이상적인 역광 + 필 라이트 세팅! 림라이트로 윤곽이 살아있으면서 얼굴 밝기도 확보됩니다. " + d.desc;
   else if (isBacklit && fillLight > 70) tip = "필 라이트가 너무 강해요. 출력을 낮추거나 거리를 멀리하세요.";
-  else if (isSidelit) tip = "사이드광은 입체감이 최고인 위치예요. " + d.desc;
-  else tip = "순광 상태 — 나무나 처마 아래에서는 얼룩 그림자가 생깁니다. 그늘 경계선을 찾거나 확산광 위치를 활용하세요.";
+  else if (isSidelit) tip = "사이드광은 입체감이 최고인 위치예요. 그림자 쪽에 반사판을 대면 더 자연스러운 인물 사진이 됩니다. " + d.desc;
+  else tip = "순광 상태 — 무난하지만 입체감이 부족해요. 사이드광이나 역광으로 방향을 바꿔보면 훨씬 드라마틱한 결과를 얻을 수 있어요.";
   document.getElementById('tip-text').textContent = tip;
 
   drawTop(sunAngle, sunElevation, fillLight, isBacklit, isSidelit, isTopLight, rimStrengthBase, sc);
@@ -648,7 +733,7 @@ function drawTop(sunAngle, sunElevation, fillLight, isBacklit, isSidelit, isTopL
   ctx.beginPath();ctx.moveTo(dX,dBY);ctx.lineTo(eX,eY);ctx.stroke();
   ctx.fillStyle=rgbStr(sc);ctx.beginPath();ctx.arc(eX,eY,3.5,0,Math.PI*2);ctx.fill();
   ctx.strokeStyle=rgbStr(sc,0.3);ctx.lineWidth=1;
-  ctx.beginPath();ctx.arc(dX,dBY,16,-Math.PI/2,-(sunElevation*DEG)-Math.PI/2,false);ctx.stroke();
+  ctx.beginPath();ctx.arc(dX,dBY,16,0,-sunElevation*DEG,true);ctx.stroke();
   ctx.fillStyle=rgbStr(sc,0.8);ctx.font="9px monospace";ctx.textAlign="left";
   ctx.fillText(sunElevation+'°',dX+2,dBY-dH-3);
 
