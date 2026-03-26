@@ -447,7 +447,7 @@ function sunColor(elevation) {
   if (elevation < 8)  return { r:255, g:100, b:20 };
   if (elevation < 18) return { r:255, g:155, b:55 };
   if (elevation < 35) return { r:255, g:200, b:115 };
-  if (elevation < 60) return { r:255, g:225, b:175 };
+  if (elevation <= 65) return { r:255, g:225, b:175 };
   return { r:215, g:232, b:255 };
 }
 
@@ -619,7 +619,8 @@ function update() {
   // TIP
   let tip = '';
   if (sunElevation === 0) tip = d.name + (sliderVal <= 50 ? " 일출" : " 일몰") + " 시간이에요. 태양이 지평선에 딱 걸려있는 순간으로 실루엣 연출에 최고이지만 촬영 가능 시간이 아주 짧아요.";
-  else if (isTopLight) tip = "🚫 정오 탑라이트는 인물 사진 최악 조건이에요. 눈 밑, 코 밑에 강한 그림자가 생깁니다. " + (currentSeason === 'winter' ? "겨울엔 정오에도 29°라 탑라이트가 없고 하루 종일 좋은 빛이에요!" : "이 시간대엔 반드시 그늘 안으로 들어가세요. 야외 직사광 인물은 비추입니다.");
+  else if (currentSeason === 'winter' && sunElevation >= 25) tip = "겨울엔 정오 무렵에도 태양 고도(최대 29°)가 낮아 탑라이트가 생기지 않고 부드러운 빛이 유지됩니다! 하루 종일 인물 촬영하기 가장 좋은 계절이에요.";
+  else if (isTopLight) tip = "🚫 정오 탑라이트는 인물 사진 최악 조건이에요. 눈 밑, 코 밑에 강한 그림자가 생깁니다. 이 시간대엔 반드시 그늘 안으로 들어가세요. 야외 직사광 인물은 비추입니다.";
   else if (isHighSun && !isBacklit && !isSidelit) tip = "⚠ 고도 " + sunElevation + "°는 순광이어도 눈 밑·코 밑 그림자가 뚜렷하게 생기는 각도예요. 나무 그늘이나 건물 그림자 안에서 촬영하거나, 역광/사이드광으로 방향을 바꿔보세요.";
   else if (isHighSun && isSidelit) tip = "⚠ 고도 " + sunElevation + "°에서 사이드광은 입체감이 있지만, 눈 그림자가 강하게 생길 수 있어요. 반사판으로 그림자 쪽을 보조하거나 살짝 역광 방향으로 틀어보세요.";
   else if (isHighSun && isBacklit && fillLight === 0) tip = "⚠ 높은 고도 역광이라 림라이트가 약하고 얼굴은 실루엣화됩니다. 스트로브나 반사판으로 필 라이트를 반드시 더해주세요.";
@@ -793,12 +794,18 @@ function drawPreview(sunElevation, fillLight, isBacklit, isSidelit, isTopLight, 
   ctx.beginPath();ctx.ellipse(px,py+9,pr*0.6,pr*1.0,0,0,Math.PI*2);ctx.fill();
   ctx.beginPath();ctx.arc(px,py-pr*0.5,pr*0.5,0,Math.PI*2);ctx.fill();
 
+  // 탑라이트 효과: 머리 위 밝게 (오직 isTopLight일 때만)
   if(isTopLight){
     const tlg=ctx.createLinearGradient(0,py-pr*1.5,0,py);
     tlg.addColorStop(0,rgbStr(sc,0.5));tlg.addColorStop(0.4,rgbStr(sc,0.1));tlg.addColorStop(1,"rgba(0,0,0,0)");
     ctx.fillStyle=tlg;ctx.beginPath();ctx.arc(px,py-pr*0.5,pr*0.6,0,Math.PI*2);ctx.fill();
+  }
+  
+  // 얼굴 아래 그림자: isTopLight 또는 순/사이드광일 때 isHighSun 구간에서
+  if(isTopLight || (isHighSun && !isBacklit)){
+    const shadowOpacity = isTopLight ? 0.25 : 0.15; // 탑라이트일 땐 더 진하게
     const es=ctx.createLinearGradient(0,py-pr*0.3,0,py+pr*0.4);
-    es.addColorStop(0,"rgba(0,0,0,0.25)");es.addColorStop(1,"rgba(0,0,0,0)");
+    es.addColorStop(0,`rgba(0,0,0,${shadowOpacity})`);es.addColorStop(1,"rgba(0,0,0,0)");
     ctx.fillStyle=es;ctx.beginPath();ctx.ellipse(px,py,pr*0.5,pr*0.45,0,0,Math.PI*2);ctx.fill();
   }
 
